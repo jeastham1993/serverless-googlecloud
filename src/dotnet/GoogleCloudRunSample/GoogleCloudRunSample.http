@@ -1,0 +1,6 @@
+@GoogleCloudRunSample_HostAddress = http://localhost:5027
+
+GET {{GoogleCloudRunSample_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
