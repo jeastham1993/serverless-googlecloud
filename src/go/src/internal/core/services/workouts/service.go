@@ -1,11 +1,10 @@
 package services
 
 import (
+	"context"
 	"errors"
 	"gcloud-serverless-gym/internal/core/domain"
 	"gcloud-serverless-gym/internal/core/ports"
-
-	"github.com/gin-gonic/gin"
 )
 
 type service struct {
@@ -18,7 +17,7 @@ func New(workoutRepository ports.WorkoutRepository) *service {
 	}
 }
 
-func (srv *service) Get(ctx *gin.Context, id string) (domain.WorkoutDTO, error) {
+func (srv *service) Get(ctx context.Context, id string) (domain.WorkoutDTO, error) {
 	workout, err := srv.workoutRepository.Get(ctx, id)
 
 	if err != nil {
@@ -28,7 +27,7 @@ func (srv *service) Get(ctx *gin.Context, id string) (domain.WorkoutDTO, error) 
 	return workout.AsDto(), nil
 }
 
-func (srv *service) Create(ctx *gin.Context, command ports.CreateWorkoutCommand) (domain.WorkoutDTO, error) {
+func (srv *service) Create(ctx context.Context, command ports.CreateWorkoutCommand) (domain.WorkoutDTO, error) {
 	if len(command.Name) < 3 {
 		return domain.WorkoutDTO{}, errors.New("name must have a length of at least 3")
 	}
@@ -53,11 +52,11 @@ func (srv *service) Create(ctx *gin.Context, command ports.CreateWorkoutCommand)
 	return workout.AsDto(), nil
 }
 
-func (srv *service) AddExerciseTo(ctx *gin.Context, workout domain.Workout, exerciseName string) (domain.WorkoutDTO, error) {
+func (srv *service) AddExerciseTo(ctx context.Context, workout domain.Workout, exerciseName string) (domain.WorkoutDTO, error) {
 	return domain.WorkoutDTO{}, nil
 }
 
-func (srv *service) List(ctx *gin.Context) []domain.WorkoutDTO {
+func (srv *service) List(ctx context.Context) []domain.WorkoutDTO {
 	var workouts [0]domain.WorkoutDTO
 
 	return workouts[:]

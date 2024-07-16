@@ -19,7 +19,7 @@ func NewWorkoutHTTPHandler(workoutService ports.WorkoutService) *WorkoutHTTPHand
 }
 
 func (hdl *WorkoutHTTPHandler) Get(c *gin.Context) {
-	workout, err := hdl.workoutService.Get(c, c.Param("id"))
+	workout, err := hdl.workoutService.Get(c.Request.Context(), c.Param("id"))
 	if err != nil {
 		slog.Error("failure retrieving data from workout service")
 		c.AbortWithStatusJSON(500, gin.H{"message": err.Error()})
@@ -37,7 +37,7 @@ func (hdl *WorkoutHTTPHandler) Post(c *gin.Context) {
 		return
 	}
 
-	workout, err := hdl.workoutService.Create(c, command)
+	workout, err := hdl.workoutService.Create(c.Request.Context(), command)
 	if err != nil {
 		c.AbortWithStatusJSON(500, gin.H{"message": err.Error()})
 		return

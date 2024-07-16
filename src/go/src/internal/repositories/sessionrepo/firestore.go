@@ -1,10 +1,10 @@
 package sessionrepo
 
 import (
+	"context"
 	"log/slog"
 
 	"cloud.google.com/go/firestore"
-	"github.com/gin-gonic/gin"
 
 	"gcloud-serverless-gym/internal/core/domain"
 )
@@ -18,7 +18,7 @@ func NewFirestoreRepository(client *firestore.Client) *FirestoreSessionRepositor
 	return &FirestoreSessionRepository{collection: workouts}
 }
 
-func (repo *FirestoreSessionRepository) Get(ctx *gin.Context, id string) (domain.Session, error) {
+func (repo *FirestoreSessionRepository) Get(ctx context.Context, id string) (domain.Session, error) {
 	workoutData, err := repo.collection.Doc(id).Get(ctx)
 
 	if err != nil {
@@ -38,7 +38,7 @@ func (repo *FirestoreSessionRepository) Get(ctx *gin.Context, id string) (domain
 	return workout, nil
 }
 
-func (repo *FirestoreSessionRepository) Save(ctx *gin.Context, workout domain.Session) error {
+func (repo *FirestoreSessionRepository) Save(ctx context.Context, workout domain.Session) error {
 	workoutDoc := repo.collection.Doc(workout.Id)
 
 	_, err := workoutDoc.Create(ctx, workout)

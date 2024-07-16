@@ -23,11 +23,8 @@ import (
 )
 
 func main() {
-
-	ctx := context.Background()
-
 	configureObservability()
-	firestoreClient, err := configureGoogleClients(ctx)
+	firestoreClient, err := configureGoogleClients(&gin.Context{})
 
 	if err != nil {
 		slog.Error("Failure starting service due to Google client configuration error. Exiting...")
@@ -59,7 +56,9 @@ func main() {
 }
 
 func configureGoogleClients(ctx context.Context) (*firestore.Client, error) {
-	si := grpctrace.StreamClientInterceptor(grpctrace.WithServiceName("firestore"))
+	si := grpctrace.StreamClientInterceptor(
+		grpctrace.WithServiceName("firestore"),
+	)
 
 	c, err := firestore.NewClient(ctx, os.Getenv("GCLOUD_PROJECT_ID"),
 		option.WithGRPCDialOption(grpc.WithStreamInterceptor(si)),

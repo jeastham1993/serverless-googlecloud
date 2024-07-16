@@ -1,9 +1,8 @@
 package ports
 
 import (
+	"context"
 	"gcloud-serverless-gym/internal/core/domain"
-
-	"github.com/gin-gonic/gin"
 )
 
 type CreateSessionCommand struct {
@@ -18,12 +17,12 @@ type CreateSessionCommandExercise struct {
 }
 
 type SessionRepository interface {
-	Get(ctx *gin.Context, id string) (domain.Session, error)
-	Save(ctx *gin.Context, session domain.Session) error
+	Get(ctx context.Context, id string) (domain.Session, error)
+	Save(ctx context.Context, session domain.Session) error
 }
 
 type SessionService interface {
-	List(ctx *gin.Context) []domain.SessionDTO
-	Get(ctx *gin.Context, id string) (domain.SessionDTO, error)
-	Create(ctx *gin.Context, command CreateSessionCommand) (domain.SessionDTO, error)
+	List(ctx context.Context) []domain.SessionDTO
+	Get(ctx context.Context, id string) (domain.SessionDTO, error)
+	Create(ctx context.Context, command CreateSessionCommand) (domain.SessionDTO, error)
 }

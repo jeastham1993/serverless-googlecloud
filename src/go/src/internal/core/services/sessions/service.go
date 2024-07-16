@@ -1,11 +1,10 @@
 package sessionService
 
 import (
+	"context"
 	"errors"
 	"gcloud-serverless-gym/internal/core/domain"
 	"gcloud-serverless-gym/internal/core/ports"
-
-	"github.com/gin-gonic/gin"
 )
 
 type SessionService struct {
@@ -18,7 +17,7 @@ func New(sessionRepository ports.SessionRepository) *SessionService {
 	}
 }
 
-func (srv *SessionService) Get(ctx *gin.Context, id string) (domain.SessionDTO, error) {
+func (srv *SessionService) Get(ctx context.Context, id string) (domain.SessionDTO, error) {
 	session, err := srv.sessionRepository.Get(ctx, id)
 
 	if err != nil {
@@ -28,7 +27,7 @@ func (srv *SessionService) Get(ctx *gin.Context, id string) (domain.SessionDTO, 
 	return session.AsDto(), nil
 }
 
-func (srv *SessionService) Create(ctx *gin.Context, command ports.CreateSessionCommand) (domain.SessionDTO, error) {
+func (srv *SessionService) Create(ctx context.Context, command ports.CreateSessionCommand) (domain.SessionDTO, error) {
 	session := domain.NewSession()
 
 	for e := range command.Exercises {
@@ -43,7 +42,7 @@ func (srv *SessionService) Create(ctx *gin.Context, command ports.CreateSessionC
 	return session.AsDto(), nil
 }
 
-func (srv *SessionService) List(ctx *gin.Context) []domain.SessionDTO {
+func (srv *SessionService) List(ctx context.Context) []domain.SessionDTO {
 	var workouts [0]domain.SessionDTO
 
 	return workouts[:]

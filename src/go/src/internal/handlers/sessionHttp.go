@@ -19,7 +19,7 @@ func NewSessionHTTPHandler(sessionService ports.SessionService) *SessionHTTPHand
 }
 
 func (hdl *SessionHTTPHandler) Get(c *gin.Context) {
-	session, err := hdl.sessionService.Get(c, c.Param("id"))
+	session, err := hdl.sessionService.Get(c.Request.Context(), c.Param("id"))
 	if err != nil {
 		slog.Error("failure retrieving data from session service")
 		c.AbortWithStatusJSON(500, gin.H{"message": err.Error()})
@@ -37,7 +37,7 @@ func (hdl *SessionHTTPHandler) Post(c *gin.Context) {
 		return
 	}
 
-	session, err := hdl.sessionService.Create(c, command)
+	session, err := hdl.sessionService.Create(c.Request.Context(), command)
 	if err != nil {
 		c.AbortWithStatusJSON(500, gin.H{"message": err.Error()})
 		return

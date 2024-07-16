@@ -27,3 +27,4 @@ go.work.sum
 **/.idea/*
 **/*.tfstate*
 **/.DS_Store
+src/go/infra/dev.tfvars

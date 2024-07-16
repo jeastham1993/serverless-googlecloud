@@ -1,10 +1,10 @@
 package workoutrepo
 
 import (
+	"context"
 	"log/slog"
 
 	"cloud.google.com/go/firestore"
-	"github.com/gin-gonic/gin"
 
 	"gcloud-serverless-gym/internal/core/domain"
 )
@@ -18,7 +18,7 @@ func NewFirestoreRepository(client *firestore.Client) *FirestoreWorkoutRepositor
 	return &FirestoreWorkoutRepository{collection: workouts}
 }
 
-func (repo *FirestoreWorkoutRepository) Get(ctx *gin.Context, id string) (domain.Workout, error) {
+func (repo *FirestoreWorkoutRepository) Get(ctx context.Context, id string) (domain.Workout, error) {
 	workoutData, err := repo.collection.Doc(id).Get(ctx)
 
 	if err != nil {
@@ -38,7 +38,7 @@ func (repo *FirestoreWorkoutRepository) Get(ctx *gin.Context, id string) (domain
 	return workout, nil
 }
 
-func (repo *FirestoreWorkoutRepository) Save(ctx *gin.Context, workout domain.Workout) error {
+func (repo *FirestoreWorkoutRepository) Save(ctx context.Context, workout domain.Workout) error {
 	workoutDoc := repo.collection.Doc(workout.Id)
 
 	_, err := workoutDoc.Create(ctx, workout)
@@ -53,7 +53,7 @@ func (repo *FirestoreWorkoutRepository) Save(ctx *gin.Context, workout domain.Wo
 	return nil
 }
 
-func (repo *FirestoreWorkoutRepository) Exists(ctx *gin.Context, name string) (bool, error) {
+func (repo *FirestoreWorkoutRepository) Exists(ctx context.Context, name string) (bool, error) {
 	query := repo.collection.Where("name", "==", name)
 
 	docs, err := query.Documents(ctx).GetAll()
