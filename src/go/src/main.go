@@ -13,6 +13,7 @@ import (
 	"google.golang.org/api/option"
 	"google.golang.org/grpc"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 
 	"log/slog"
@@ -38,15 +39,28 @@ func main() {
 	workoutHandler := handlers.NewWorkoutHTTPHandler(workoutService)
 
 	sessionRepository := sessionrepo.NewFirestoreRepository(firestoreClient)
-	sessionService := sessionService.New(sessionRepository)
+	sessionService := sessionService.New(sessionRepository, workoutService)
 	sessionHandler := handlers.NewSessionHTTPHandler(sessionService)
 
 	router := gin.New()
+
 	router.Use(gintrace.Middleware(os.Getenv("DD_SERVICE")))
-	router.GET("/workout/:id", workoutHandler.Get)
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "PUT", "POST"},
+		AllowHeaders:     []string{"Origin"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	}))
+	router.GET("/workout", workoutHandler.List)
 	router.POST("/workout", workoutHandler.Post)
-	router.GET("/session/:id", sessionHandler.Get)
+	router.GET("/workout/:id", workoutHandler.Get)
+
+	router.GET("/session", sessionHandler.List)
 	router.POST("/session", sessionHandler.Post)
+	router.GET("/session/:id", sessionHandler.Get)
+	router.PUT("/session/:id", sessionHandler.Update)
+	router.POST("/session/from", sessionHandler.PostFromWorkout)
 
 	router.Run(":8080")
 

@@ -5,6 +5,7 @@ import (
 	"log/slog"
 
 	"cloud.google.com/go/firestore"
+	"google.golang.org/api/iterator"
 
 	"gcloud-serverless-gym/internal/core/domain"
 )
@@ -54,7 +55,7 @@ func (repo *FirestoreWorkoutRepository) Save(ctx context.Context, workout domain
 }
 
 func (repo *FirestoreWorkoutRepository) Exists(ctx context.Context, name string) (bool, error) {
-	query := repo.collection.Where("name", "==", name)
+	query := repo.collection.Where("Name", "==", name)
 
 	docs, err := query.Documents(ctx).GetAll()
 	if err != nil {
@@ -68,4 +69,32 @@ func (repo *FirestoreWorkoutRepository) Exists(ctx context.Context, name string)
 	}
 
 	return false, nil
+}
+
+func (repo *FirestoreWorkoutRepository) List(ctx context.Context) ([]domain.Workout, error) {
+	var workouts []domain.Workout
+
+	docsIter := repo.collection.Documents(ctx)
+	defer docsIter.Stop()
+
+	for {
+		doc, err := docsIter.Next()
+
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			slog.Error(err.Error())
+			continue
+		}
+
+		var workout domain.Workout
+		if err := doc.DataTo(&workout); err != nil {
+			slog.Error(err.Error())
+			continue
+		}
+		workouts = append(workouts, workout)
+	}
+
+	return workouts, nil
 }

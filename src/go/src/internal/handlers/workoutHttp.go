@@ -18,6 +18,12 @@ func NewWorkoutHTTPHandler(workoutService ports.WorkoutService) *WorkoutHTTPHand
 	}
 }
 
+func (hdl *WorkoutHTTPHandler) List(c *gin.Context) {
+	workouts := hdl.workoutService.List(c.Request.Context())
+
+	c.JSON(200, workouts)
+}
+
 func (hdl *WorkoutHTTPHandler) Get(c *gin.Context) {
 	workout, err := hdl.workoutService.Get(c.Request.Context(), c.Param("id"))
 	if err != nil {

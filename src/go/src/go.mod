@@ -4,8 +4,11 @@ go 1.22.2
 
 require (
 	cloud.google.com/go/firestore v1.15.0
+	github.com/gin-contrib/cors v1.7.2
 	github.com/gin-gonic/gin v1.10.0
 	github.com/google/uuid v1.6.0
+	google.golang.org/api v0.167.0
+	google.golang.org/grpc v1.62.0
 	gopkg.in/DataDog/dd-trace-go.v1 v1.65.1
 )
 
@@ -81,12 +84,10 @@ require (
 	golang.org/x/time v0.5.0 // indirect
 	golang.org/x/tools v0.12.1-0.20230815132531-74c255bcf846 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
-	google.golang.org/api v0.167.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto v0.0.0-20240213162025-012b6fc9bca9 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240304161311-37d4d3c04a78 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240304161311-37d4d3c04a78 // indirect
-	google.golang.org/grpc v1.62.0 // indirect
 	google.golang.org/protobuf v1.34.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

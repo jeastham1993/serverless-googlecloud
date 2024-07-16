@@ -57,7 +57,16 @@ func (srv *service) AddExerciseTo(ctx context.Context, workout domain.Workout, e
 }
 
 func (srv *service) List(ctx context.Context) []domain.WorkoutDTO {
-	var workouts [0]domain.WorkoutDTO
+	workouts, err := srv.workoutRepository.List(ctx)
+	var workoutList []domain.WorkoutDTO
 
-	return workouts[:]
+	if err != nil {
+		return workoutList
+	}
+
+	for w := range workouts {
+		workoutList = append(workoutList, workouts[w].AsDto())
+	}
+
+	return workoutList
 }

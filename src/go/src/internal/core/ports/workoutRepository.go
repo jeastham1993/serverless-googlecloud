@@ -17,6 +17,7 @@ type CreateWorkoutCommandExercise struct {
 }
 
 type WorkoutRepository interface {
+	List(ctx context.Context) ([]domain.Workout, error)
 	Get(ctx context.Context, id string) (domain.Workout, error)
 	Save(ctx context.Context, workout domain.Workout) error
 	Exists(ctx context.Context, name string) (bool, error)
