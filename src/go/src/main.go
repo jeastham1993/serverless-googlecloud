@@ -2,9 +2,12 @@ package main
 
 import (
 	"context"
+	"gcloud-serverless-gym/internal/adapters"
+	exerciseHistoryService "gcloud-serverless-gym/internal/core/services/exerciseHistory"
 	sessionService "gcloud-serverless-gym/internal/core/services/sessions"
 	services "gcloud-serverless-gym/internal/core/services/workouts"
 	"gcloud-serverless-gym/internal/handlers"
+	historyrepo "gcloud-serverless-gym/internal/repositories/exercisehistoryrepo"
 	"gcloud-serverless-gym/internal/repositories/sessionrepo"
 	"gcloud-serverless-gym/internal/repositories/workoutrepo"
 	"os"
@@ -34,13 +37,19 @@ func main() {
 
 	defer firestoreClient.Close()
 
+	taskRunner := adapters.NewCloudTaskRunner(&gin.Context{})
+
 	firestoreRepository := workoutrepo.NewFirestoreRepository(firestoreClient)
 	workoutService := services.New(firestoreRepository)
 	workoutHandler := handlers.NewWorkoutHTTPHandler(workoutService)
 
 	sessionRepository := sessionrepo.NewFirestoreRepository(firestoreClient)
-	sessionService := sessionService.New(sessionRepository, workoutService)
+	sessionService := sessionService.New(sessionRepository, workoutService, taskRunner)
 	sessionHandler := handlers.NewSessionHTTPHandler(sessionService)
+
+	historyRepository := historyrepo.NewFirestoreRepository(firestoreClient)
+	historyService := exerciseHistoryService.New(historyRepository, sessionService)
+	historyHandlers := handlers.NewExerciseHistoryHTTPHandler(historyService)
 
 	router := gin.New()
 
@@ -48,7 +57,7 @@ func main() {
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"GET", "PUT", "POST"},
-		AllowHeaders:     []string{"Origin"},
+		AllowHeaders:     []string{"*"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 	}))
@@ -61,6 +70,10 @@ func main() {
 	router.GET("/session/:id", sessionHandler.Get)
 	router.PUT("/session/:id", sessionHandler.Update)
 	router.POST("/session/from", sessionHandler.PostFromWorkout)
+	router.POST("/session/finish", sessionHandler.Finish)
+
+	router.GET("/history/:name", historyHandlers.Get)
+	router.POST("/history", historyHandlers.CreateFor)
 
 	router.Run(":8080")
 

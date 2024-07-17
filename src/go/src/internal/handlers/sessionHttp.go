@@ -83,6 +83,23 @@ func (hdl *SessionHTTPHandler) Update(c *gin.Context) {
 	c.JSON(200, session)
 }
 
+func (hdl *SessionHTTPHandler) Finish(c *gin.Context) {
+	var command ports.FinishSessionCommand
+
+	if err := c.BindJSON(&command); err != nil {
+		slog.Error(err.Error())
+		return
+	}
+
+	session, err := hdl.sessionService.FinishSession(c.Request.Context(), command)
+	if err != nil {
+		c.AbortWithStatusJSON(500, gin.H{"message": err.Error()})
+		return
+	}
+
+	c.JSON(200, session)
+}
+
 func (hdl *SessionHTTPHandler) List(c *gin.Context) {
 	workouts := hdl.sessionService.List(c.Request.Context())
 

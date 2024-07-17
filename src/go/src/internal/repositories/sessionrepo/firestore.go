@@ -59,6 +59,7 @@ func (repo *FirestoreSessionRepository) Update(ctx context.Context, workout doma
 
 	_, err := workoutDoc.Set(ctx, map[string]interface{}{
 		"Exercises": workout.Exercises,
+		"Status":    workout.Status,
 	}, firestore.MergeAll)
 
 	if err != nil {

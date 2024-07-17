@@ -8,12 +8,20 @@ type Session struct {
 	Id        string            `json:"id"`
 	Date      time.Time         `json:"date"`
 	Exercises []SessionExercise `json:"exercises"`
+	Status    string            `json:"status"`
 }
 
-func NewSession() Session {
+func NewSession(name string) Session {
 	timeNow := time.Now().Local()
 
-	workout := Session{Id: timeNow.Format("2006-01-02 15"), Date: timeNow, Exercises: []SessionExercise{}}
+	workout := Session{Id: name, Date: timeNow, Exercises: []SessionExercise{}}
+	return workout
+}
+
+func NewSessionFrom(name string, session Session) Session {
+	timeNow := time.Now().Local()
+
+	workout := Session{Id: name, Date: timeNow, Exercises: session.Exercises}
 	return workout
 }
 
@@ -29,6 +37,10 @@ func (w *Session) AsDto() SessionDTO {
 	workoutDto := SessionDTO{Id: w.Id, Date: w.Date, Exercises: exercises}
 
 	return workoutDto
+}
+
+func (w *Session) Finished() {
+	w.Status = "FINISHED"
 }
 
 type SessionDTO struct {

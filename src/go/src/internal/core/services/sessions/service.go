@@ -11,12 +11,14 @@ import (
 type SessionService struct {
 	sessionRepository ports.SessionRepository
 	workoutService    ports.WorkoutService
+	taskRunner        ports.TaskRunner
 }
 
-func New(sessionRepository ports.SessionRepository, workoutService ports.WorkoutService) *SessionService {
+func New(sessionRepository ports.SessionRepository, workoutService ports.WorkoutService, taskRunner ports.TaskRunner) *SessionService {
 	return &SessionService{
 		sessionRepository: sessionRepository,
 		workoutService:    workoutService,
+		taskRunner:        taskRunner,
 	}
 }
 
@@ -31,7 +33,7 @@ func (srv *SessionService) Get(ctx context.Context, id string) (domain.SessionDT
 }
 
 func (srv *SessionService) Create(ctx context.Context, command ports.CreateSessionCommand) (domain.SessionDTO, error) {
-	session := domain.NewSession()
+	session := domain.NewSession(command.Name)
 
 	for e := range command.Exercises {
 		exercise := command.Exercises[e]
@@ -53,7 +55,7 @@ func (srv *SessionService) CreateSessionFromWorkout(ctx context.Context, command
 		return domain.SessionDTO{}, err
 	}
 
-	session := domain.NewSession()
+	session := domain.NewSession(command.Name)
 
 	for e := range workout.Exercises {
 		exercise := workout.Exercises[e]
@@ -71,6 +73,21 @@ func (srv *SessionService) CreateSessionFromWorkout(ctx context.Context, command
 	srv.sessionRepository.Save(ctx, session)
 
 	return session.AsDto(), nil
+}
+
+func (srv *SessionService) DuplicateSession(ctx context.Context, command ports.DuplicateSessionCommand) (domain.SessionDTO, error) {
+	session, err := srv.sessionRepository.Get(ctx, command.SessionId)
+
+	if err != nil {
+		slog.Error("Session not found")
+		return domain.SessionDTO{}, err
+	}
+
+	newSession := domain.NewSessionFrom(command.Name, session)
+
+	srv.sessionRepository.Save(ctx, newSession)
+
+	return newSession.AsDto(), nil
 }
 
 func (srv *SessionService) Update(ctx context.Context, session domain.SessionDTO) (domain.SessionDTO, error) {
@@ -114,4 +131,25 @@ func (srv *SessionService) List(ctx context.Context) []domain.SessionDTO {
 	}
 
 	return sessionList
+}
+
+func (srv *SessionService) FinishSession(ctx context.Context, command ports.FinishSessionCommand) (domain.SessionDTO, error) {
+	session, err := srv.sessionRepository.Get(ctx, command.SessionId)
+
+	if session.Status == "FINISHED" {
+		return session.AsDto(), nil
+	}
+
+	if err != nil {
+		slog.Error(err.Error())
+		return domain.SessionDTO{}, err
+	}
+
+	srv.taskRunner.StartHistoryUpdateFor(ctx, session)
+
+	session.Finished()
+
+	srv.sessionRepository.Update(ctx, session)
+
+	return session.AsDto(), nil
 }

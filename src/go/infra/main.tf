@@ -11,8 +11,8 @@ resource "random_string" "rev_name_postfix_live" {
 
 resource "random_string" "rev_name_postfix_canary" {
   keepers = {
-    canary_enabled    = var.canary_enabled
-    canary_image_name = var.canary_image_tag
+    canary_enabled     = var.canary_enabled
+    canary_image_name  = var.canary_image_tag
     force_new_revision = var.force_new_revision
   }
   length  = 2
@@ -35,8 +35,8 @@ resource "google_cloud_run_v2_service" "default" {
   ingress  = "INGRESS_TRAFFIC_ALL"
 
   template {
-    revision = var.canary_enabled ? local.rev_name_canary : local.rev_name_live
-    service_account = google_service_account.cloudrun_service_identity.email
+    revision                         = var.canary_enabled ? local.rev_name_canary : local.rev_name_live
+    service_account                  = google_service_account.cloudrun_service_identity.email
     max_instance_request_concurrency = 10
     containers {
       image = var.canary_enabled ? "${var.repository}:${var.canary_image_tag}" : "${var.repository}:${var.live_image_tag}"
@@ -65,6 +65,14 @@ resource "google_cloud_run_v2_service" "default" {
         name  = "GCLOUD_PROJECT_ID"
         value = data.google_project.project.project_id
       }
+      env {
+        name  = "APP_URL"
+        value = "https://gcloud-go-7tq7m2dbcq-nw.a.run.app"
+      }
+      env {
+        name  = "QUEUE_NAME"
+        value = google_cloud_tasks_queue.default.id
+      }
       dynamic "env" {
         for_each = var.canary_enabled ? { "CANARY" = 1 } : {}
         content {
@@ -81,7 +89,7 @@ resource "google_cloud_run_v2_service" "default" {
     percent = var.canary_enabled ? var.canary_percent : 100
     # revision is named live by default. When canary is enabled, a new revision named canary is deployed
     revision = var.canary_enabled ? local.rev_name_canary : local.rev_name_live
-    tag = var.canary_enabled ? var.canary_image_tag : var.live_image_tag
+    tag      = var.canary_enabled ? var.canary_image_tag : var.live_image_tag
   }
 
   dynamic "traffic" {
@@ -105,5 +113,11 @@ resource "google_secret_manager_secret_iam_member" "secret-access" {
 resource "google_project_iam_member" "firestore-access" {
   project = data.google_project.project.project_id
   role    = "roles/datastore.user"
+  member  = "serviceAccount:${google_service_account.cloudrun_service_identity.email}"
+}
+
+resource "google_project_iam_member" "cloudtasks-access" {
+  project = data.google_project.project.project_id
+  role    = "roles/cloudtasks.enqueuer"
   member  = "serviceAccount:${google_service_account.cloudrun_service_identity.email}"
 }

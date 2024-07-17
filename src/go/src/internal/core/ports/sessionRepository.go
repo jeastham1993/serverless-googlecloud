@@ -7,6 +7,7 @@ import (
 
 type CreateSessionCommand struct {
 	Exercises []CreateSessionCommandExercise `json:"exercises"`
+	Name      string                         `json:"name"`
 }
 
 type CreateSessionCommandExercise struct {
@@ -18,6 +19,16 @@ type CreateSessionCommandExercise struct {
 
 type CreateSessionFromWorkoutCommand struct {
 	WorkoutId string `json:"workoutId"`
+	Name      string `json:"name"`
+}
+
+type DuplicateSessionCommand struct {
+	SessionId string `json:"sessionId"`
+	Name      string `json:"name"`
+}
+
+type FinishSessionCommand struct {
+	SessionId string `json:"sessionId"`
 }
 
 type SessionRepository interface {
@@ -33,4 +44,6 @@ type SessionService interface {
 	Create(ctx context.Context, command CreateSessionCommand) (domain.SessionDTO, error)
 	Update(ctx context.Context, session domain.SessionDTO) (domain.SessionDTO, error)
 	CreateSessionFromWorkout(ctx context.Context, command CreateSessionFromWorkoutCommand) (domain.SessionDTO, error)
+	DuplicateSession(ctx context.Context, command DuplicateSessionCommand) (domain.SessionDTO, error)
+	FinishSession(ctx context.Context, command FinishSessionCommand) (domain.SessionDTO, error)
 }
