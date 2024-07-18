@@ -1,6 +1,5 @@
-"use client";
-
 import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   Button,
   Card,
@@ -12,16 +11,17 @@ import {
 } from "@mui/material";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Unstable_Grid2";
-import axios from "axios";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { useRouter } from "next/navigation";
+import { api } from "../axiosConfig";
+import { Session, SessionExercise } from "../models/session";
 
 const style = {
   my: 2,
 };
 
-export default function Page({ params }: { params: { id: string } }) {
-  const router = useRouter();
+export default function ViewSession(props: any) {
+  const { id } = useParams();
+  const navigate = useNavigate();
   const [isLoading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [session, setSession] = useState<Session>({
@@ -48,10 +48,7 @@ export default function Page({ params }: { params: { id: string } }) {
   };
 
   const saveSession = async () => {
-    await axios.put(
-      `https://gcloud-go-7tq7m2dbcq-nw.a.run.app/session/${session.id}`,
-      session
-    );
+    await api.put(`/session/${session.id}`, session);
 
     setOpen(true);
   };
@@ -184,14 +181,12 @@ export default function Page({ params }: { params: { id: string } }) {
     saveSession();
   };
 
-  const refreshData = () => {
-    console.log(params.id);
-    fetch(`https://gcloud-go-7tq7m2dbcq-nw.a.run.app/session/${params.id}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setSession(data);
-        setLoading(false);
-      });
+  const refreshData = async () => {
+    console.log(id);
+    const data = await api.get(`/session/${id}`);
+
+    setSession(data.data);
+    setLoading(false);
   };
 
   const handleOnBlur = async (evt: any) => {

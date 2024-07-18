@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"gcloud-serverless-gym/internal/adapters"
+	"gcloud-serverless-gym/internal/auth"
 	exerciseHistoryService "gcloud-serverless-gym/internal/core/services/exerciseHistory"
 	sessionService "gcloud-serverless-gym/internal/core/services/sessions"
 	services "gcloud-serverless-gym/internal/core/services/workouts"
@@ -61,6 +62,16 @@ func main() {
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 	}))
+
+	authClient, err := auth.InitAuth()
+
+	if err != nil {
+		slog.Error(err.Error())
+		panic("Failure configuring authorization")
+	}
+
+	router.Use(auth.AuthJWT(authClient))
+
 	router.GET("/workout", workoutHandler.List)
 	router.POST("/workout", workoutHandler.Post)
 	router.GET("/workout/:id", workoutHandler.Get)

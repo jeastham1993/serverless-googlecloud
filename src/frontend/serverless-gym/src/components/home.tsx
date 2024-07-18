@@ -1,6 +1,5 @@
-"use client";
-
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Button,
   Fab,
@@ -20,12 +19,13 @@ import Box from "@mui/material/Box";
 import Grid from "@mui/material/Unstable_Grid2"; // Grid version 2
 import Divider from "@mui/material/Divider";
 import AddIcon from "@mui/icons-material/Add";
-import axios from "axios";
-import { useRouter } from "next/navigation";
-import { isAuthenticated } from "./services/authService";
+import { api } from "../axiosConfig";
+import { isAuthenticated } from "../services/authService";
+import { Session } from "../models/session";
+import { Exercise, Workout } from "../models/workout";
 
 const style = {
-  position: "absolute" as "absolute",
+  position: "absolute",
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
@@ -36,7 +36,7 @@ const style = {
 };
 
 export default function Home() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [data, setData] = useState<Workout[]>([]);
   const [isLoading, setLoading] = useState(true);
   const [newSessionName, setNewSessionName] = useState("");
@@ -57,32 +57,23 @@ export default function Home() {
     reps: 0,
   });
 
-  const handleNameChange = (
-    e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
-  ) => setNetWorkout({ ...newWorkout, name: e.target!.value });
+  const handleNameChange = (e: any) =>
+    setNetWorkout({ ...newWorkout, name: e.target.value });
 
-  const handleSetsChange = (
-    e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
-  ) => {
+  const handleSetsChange = (e: any) => {
     setNewExercise({ ...newExercise, sets: parseInt(e.target.value) });
     console.log(newExercise);
   };
 
-  const handleRepsChange = (
-    e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
-  ) => {
+  const handleRepsChange = (e: any) => {
     setNewExercise({ ...newExercise, reps: parseInt(e.target.value) });
   };
 
-  const handleExerciseNameChange = (
-    e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
-  ) => {
+  const handleExerciseNameChange = (e: any) => {
     setNewExercise({ ...newExercise, name: e.target.value });
   };
 
-  const handleNewSessionNameChange = (
-    e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
-  ) => {
+  const handleNewSessionNameChange = (e: any) => {
     setNewSessionName(e.target.value);
   };
 
@@ -110,47 +101,35 @@ export default function Home() {
       return;
     }
 
-    const postResponse = await axios.post<Session>(
-      "https://gcloud-go-7tq7m2dbcq-nw.a.run.app/session/from",
-      {
-        workoutId,
-      }
-    );
+    const postResponse = await api.post<Session>("/session/from", {
+      workoutId,
+    });
 
-    router.push(`sessions/${encodeURIComponent(postResponse.data.id)}`);
+    navigate(`sessions/${encodeURIComponent(postResponse.data.id)}`);
   };
 
   const saveWorkout = async () => {
     console.log(newWorkout);
 
-    const postResponse = await axios.post(
-      "https://gcloud-go-7tq7m2dbcq-nw.a.run.app/workout",
-      newWorkout
-    );
+    const postResponse = await api.post("/workout", newWorkout);
 
     handleClose();
   };
 
-  const refreshData = () => {
+  const refreshData = async () => {
     if (!isAuthenticated()) {
-      router.push("/login");
+      navigate("/login");
     }
 
-    fetch("https://gcloud-go-7tq7m2dbcq-nw.a.run.app/workout")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data === null) {
-          data = [];
-        }
+    const data = await api.get<Workout[]>("/workout");
 
-        setData(data);
-        setLoading(false);
-      });
+    setData(data.data);
+    setLoading(false);
   };
 
   useEffect(() => {
     if (!isAuthenticated()) {
-      router.push("/login");
+      navigate("/login");
     }
 
     refreshData();
@@ -174,7 +153,7 @@ export default function Home() {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {d.exercises.map((e) => (
+                      {d.exercises.map((e: Exercise) => (
                         <TableRow
                           key={e.name}
                           sx={{

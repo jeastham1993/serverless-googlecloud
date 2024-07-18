@@ -121,3 +121,9 @@ resource "google_project_iam_member" "cloudtasks-access" {
   role    = "roles/cloudtasks.enqueuer"
   member  = "serviceAccount:${google_service_account.cloudrun_service_identity.email}"
 }
+
+# resource "google_project_iam_member" "cloudtasks-access" {
+#   project = data.google_project.project.project_id
+#   role    = "roles/cloudtasks.enqueuer"
+#   member  = "serviceAccount:${google_service_account.cloudrun_service_identity.email}"
+# }

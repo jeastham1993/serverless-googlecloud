@@ -1,9 +1,9 @@
-"use client";
-
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Button,
   Fab,
+  Link,
   Modal,
   Paper,
   Table,
@@ -18,13 +18,12 @@ import {
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Unstable_Grid2"; // Grid version 2
 import Divider from "@mui/material/Divider";
-import { useRouter } from "next/navigation";
-import axios from "axios";
-import Link from "next/link";
 import { initializeApp } from "firebase/app";
 import { firebaseConfig } from "../config";
 import { getAuth } from "firebase/auth";
 import { isAuthenticated } from "../services/authService";
+import { api } from "../axiosConfig";
+import { Session, SessionExercise } from "../models/session";
 
 const style = {
   position: "absolute" as "absolute",
@@ -40,8 +39,8 @@ const style = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-export default function Home() {
-  const router = useRouter();
+export default function SessionPage() {
+  const navigate = useNavigate();
   const [data, setData] = useState<Session[]>([]);
   const [isLoading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
@@ -58,10 +57,7 @@ export default function Home() {
   };
 
   const saveSession = async () => {
-    const putResponse = await axios.put(
-      `https://gcloud-go-7tq7m2dbcq-nw.a.run.app/session/${session.id}`,
-      session
-    );
+    const putResponse = await api.put(`/session/${session.id}`, session);
 
     setSession({
       id: "",
@@ -124,13 +120,11 @@ export default function Home() {
     setSession({ ...session, exercises: newExercises });
   };
 
-  const refreshData = () => {
-    fetch("https://gcloud-go-7tq7m2dbcq-nw.a.run.app/session")
-      .then((res) => res.json())
-      .then((data) => {
-        setData(data);
-        setLoading(false);
-      });
+  const refreshData = async () => {
+    const data = await api.get("/session");
+
+    setData(data.data);
+    setLoading(false);
   };
 
   const getLink = (session: Session) => {
@@ -141,7 +135,7 @@ export default function Home() {
 
   useEffect(() => {
     if (!isAuthenticated()) {
-      router.push("/login");
+      navigate("/login");
     }
     refreshData();
   }, []);

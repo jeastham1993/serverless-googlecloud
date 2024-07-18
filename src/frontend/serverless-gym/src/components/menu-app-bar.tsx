@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useNavigate } from "react-router-dom";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
@@ -7,17 +8,18 @@ import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
-
+ 
 import { firebaseConfig } from "../config";
 import { initializeApp } from "firebase/app";
-import {
-  getAuth,
-} from "firebase/auth";
+import { getAuth } from "firebase/auth";
+import { isAuthenticated, logout } from "../services/authService";
+import { Divider } from "@mui/material";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 export default function MenuAppBar() {
+  const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -26,6 +28,14 @@ export default function MenuAppBar() {
 
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const logoutClick = () => {
+    logout(navigate);
+  };
+
+  const routeTo = (path: string) => {
+    navigate(path);
   };
 
   return (
@@ -62,9 +72,17 @@ export default function MenuAppBar() {
                 open={Boolean(anchorEl)}
                 onClose={handleClose}
               >
-                <MenuItem href="/">Workouts</MenuItem>
-                <MenuItem href="/sessions">Sessions</MenuItem>
+                <MenuItem onClick={() => routeTo("/")}>Workouts</MenuItem>
+                <MenuItem onClick={() => routeTo("/session")}>
+                  Sessions
+                </MenuItem>
                 <MenuItem onClick={handleClose}>Exercises</MenuItem>
+                <Divider />
+                {isAuthenticated() ? (
+                  <MenuItem onClick={logoutClick}>Logout</MenuItem>
+                ) : (
+                  <div></div>
+                )}
               </Menu>
             </div>
           )}

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"gcloud-serverless-gym/internal/core/ports"
 
 	"github.com/gin-gonic/gin"
@@ -19,6 +20,10 @@ func NewWorkoutHTTPHandler(workoutService ports.WorkoutService) *WorkoutHTTPHand
 }
 
 func (hdl *WorkoutHTTPHandler) List(c *gin.Context) {
+	userId, _ := c.Get("USER_ID")
+
+	slog.Info(fmt.Sprint(userId))
+
 	workouts := hdl.workoutService.List(c.Request.Context())
 
 	c.JSON(200, workouts)

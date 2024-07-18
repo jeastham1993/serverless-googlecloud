@@ -1,10 +1,10 @@
-interface Workout {
+export interface Workout {
     id: string,
     name: string,
     exercises: Exercise[]
 }
 
-interface Exercise {
+export interface Exercise {
     name: string,
     reps: number,
     sets: number
