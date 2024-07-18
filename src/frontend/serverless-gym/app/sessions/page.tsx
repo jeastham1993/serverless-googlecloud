@@ -18,9 +18,13 @@ import {
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Unstable_Grid2"; // Grid version 2
 import Divider from "@mui/material/Divider";
-import AddIcon from "@mui/icons-material/Add";
+import { useRouter } from "next/navigation";
 import axios from "axios";
 import Link from "next/link";
+import { initializeApp } from "firebase/app";
+import { firebaseConfig } from "../config";
+import { getAuth } from "firebase/auth";
+import { isAuthenticated } from "../services/authService";
 
 const style = {
   position: "absolute" as "absolute",
@@ -33,7 +37,11 @@ const style = {
   p: 4,
 };
 
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
 export default function Home() {
+  const router = useRouter();
   const [data, setData] = useState<Session[]>([]);
   const [isLoading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
@@ -72,7 +80,10 @@ export default function Home() {
     handleOpen();
   };
 
-  const handleRepsChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>, exercise: SessionExercise) => {
+  const handleRepsChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
+    exercise: SessionExercise
+  ) => {
     const newSession: SessionExercise = {
       name: exercise.name,
       set: exercise.set,
@@ -91,7 +102,10 @@ export default function Home() {
     setSession({ ...session, exercises: newExercises });
   };
 
-  const handleWeightChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>, exercise: SessionExercise) => {
+  const handleWeightChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
+    exercise: SessionExercise
+  ) => {
     const newSession: SessionExercise = {
       name: exercise.name,
       set: exercise.set,
@@ -123,9 +137,12 @@ export default function Home() {
     const link = `sessions/${encodeURIComponent(session.id)}`;
     console.log(link);
     return link;
-  }
+  };
 
   useEffect(() => {
+    if (!isAuthenticated()) {
+      router.push("/login");
+    }
     refreshData();
   }, []);
 

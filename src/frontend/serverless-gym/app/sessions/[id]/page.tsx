@@ -15,12 +15,14 @@ import Box from "@mui/material/Box";
 import Grid from "@mui/material/Unstable_Grid2";
 import axios from "axios";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { useRouter } from "next/navigation";
 
 const style = {
   my: 2,
 };
 
 export default function Page({ params }: { params: { id: string } }) {
+  const router = useRouter();
   const [isLoading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [session, setSession] = useState<Session>({

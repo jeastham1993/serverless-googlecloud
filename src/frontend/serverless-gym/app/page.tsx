@@ -22,6 +22,7 @@ import Divider from "@mui/material/Divider";
 import AddIcon from "@mui/icons-material/Add";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { isAuthenticated } from "./services/authService";
 
 const style = {
   position: "absolute" as "absolute",
@@ -56,23 +57,32 @@ export default function Home() {
     reps: 0,
   });
 
-  const handleNameChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) =>
-    setNetWorkout({ ...newWorkout, name: e.target!.value });
+  const handleNameChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+  ) => setNetWorkout({ ...newWorkout, name: e.target!.value });
 
-  const handleSetsChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+  const handleSetsChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+  ) => {
     setNewExercise({ ...newExercise, sets: parseInt(e.target.value) });
     console.log(newExercise);
   };
 
-  const handleRepsChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+  const handleRepsChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+  ) => {
     setNewExercise({ ...newExercise, reps: parseInt(e.target.value) });
   };
 
-  const handleExerciseNameChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+  const handleExerciseNameChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+  ) => {
     setNewExercise({ ...newExercise, name: e.target.value });
   };
 
-  const handleNewSessionNameChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+  const handleNewSessionNameChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+  ) => {
     setNewSessionName(e.target.value);
   };
 
@@ -122,6 +132,10 @@ export default function Home() {
   };
 
   const refreshData = () => {
+    if (!isAuthenticated()) {
+      router.push("/login");
+    }
+
     fetch("https://gcloud-go-7tq7m2dbcq-nw.a.run.app/workout")
       .then((res) => res.json())
       .then((data) => {
@@ -135,6 +149,10 @@ export default function Home() {
   };
 
   useEffect(() => {
+    if (!isAuthenticated()) {
+      router.push("/login");
+    }
+
     refreshData();
   }, []);
 
