@@ -5,7 +5,6 @@ import {
   Fab,
   Modal,
   Paper,
-  styled,
   Table,
   TableBody,
   TableCell,
@@ -23,6 +22,7 @@ import { api } from "../axiosConfig";
 import { isAuthenticated } from "../services/authService";
 import { Session } from "../models/session";
 import { Exercise, Workout } from "../models/workout";
+import ExerciseTitle from "./exerciseTitle";
 
 const style = {
   position: "absolute",
@@ -103,9 +103,12 @@ export default function Home() {
 
     const postResponse = await api.post<Session>("/session/from", {
       workoutId,
+      name: newSessionName,
     });
 
-    navigate(`sessions/${encodeURIComponent(postResponse.data.id)}`);
+    console.log(postResponse);
+
+    navigate(`session/${encodeURIComponent(postResponse.data.id)}`);
   };
 
   const saveWorkout = async () => {
@@ -143,47 +146,58 @@ export default function Home() {
             {data.map((d) => (
               <Box key={d.id} sx={{ minWidth: 275, p: 2 }}>
                 <Typography variant="h3">{d.name}</Typography>
-                <TableContainer component={Paper}>
-                  <Table sx={{ minWidth: 650 }} aria-label="simple table">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Name</TableCell>
-                        <TableCell align="right">Sets</TableCell>
-                        <TableCell align="right">Reps</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {d.exercises.map((e: Exercise) => (
-                        <TableRow
-                          key={e.name}
-                          sx={{
-                            "&:last-child td, &:last-child th": { border: 0 },
-                          }}
-                        >
-                          <TableCell component="th" scope="row">
-                            {e.name}
-                          </TableCell>
-                          <TableCell align="right">{e.reps}</TableCell>
-                          <TableCell align="right">{e.sets}</TableCell>
+                <Grid container>
+                  <TableContainer component={Paper}>
+                    <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Name</TableCell>
+                          <TableCell align="right">Sets</TableCell>
+                          <TableCell align="right">Reps</TableCell>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-                <TextField
-                  sx={{ my: 2, mx: 1 }}
-                  label="Session Name"
-                  variant="outlined"
-                  value={newSessionName}
-                  onChange={handleNewSessionNameChange}
-                />
-                <Button
-                  variant="contained"
-                  sx={{ my: 2 }}
-                  onClick={() => startWorkoutFromSession(d.id)}
-                >
-                  Start Session
-                </Button>
+                      </TableHead>
+                      <TableBody>
+                        {d.exercises.map((e: Exercise) => (
+                          <TableRow
+                            key={e.name}
+                            sx={{
+                              "&:last-child td, &:last-child th": { border: 0 },
+                            }}
+                          >
+                            <TableCell component="th" scope="row">
+                              <ExerciseTitle name={e.name} set={0} />
+                            </TableCell>
+                            <TableCell align="right">{e.reps}</TableCell>
+                            <TableCell align="right">{e.sets}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </Grid>
+                <Grid container>
+                  <Grid>
+                    <TextField
+                      sx={{ my: 1, mx: 1 }}
+                      label="Session Name"
+                      variant="outlined"
+                      value={newSessionName}
+                      onChange={handleNewSessionNameChange}
+                    />
+                  </Grid>
+                  <Grid>
+                    <Button
+                      variant="contained"
+                      sx={{ my: 2 }}
+                      onClick={() => startWorkoutFromSession(d.id)}
+                      item
+                      style={{ display: "flex" }}
+                    >
+                      Start Session
+                    </Button>
+                  </Grid>
+                </Grid>
+
                 <Divider sx={{ my: 2 }} />
               </Box>
             ))}
@@ -191,7 +205,7 @@ export default function Home() {
         </Grid>
       </Box>
       <Fab
-        sx={{ position: "absolute", right: 10, bottom: 10 }}
+        sx={{ position: "fixed", right: 10, bottom: 10 }}
         color="primary"
         aria-label="add"
         onClick={handleOpen}

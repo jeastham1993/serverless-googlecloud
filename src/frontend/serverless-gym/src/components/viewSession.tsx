@@ -8,22 +8,48 @@ import {
   Snackbar,
   TextField,
   Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Modal,
 } from "@mui/material";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Unstable_Grid2";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { api } from "../axiosConfig";
 import { Session, SessionExercise } from "../models/session";
+import { ExerciseHistroy } from "../models/exerciseHistory";
+import ExerciseTitle from "./exerciseTitle";
 
 const style = {
   my: 2,
+};
+
+const modalStyle = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: "75vw",
+  bgcolor: "background.paper",
+  boxShadow: 24,
+  p: 4,
 };
 
 export default function ViewSession(props: any) {
   const { id } = useParams();
   const navigate = useNavigate();
   const [isLoading, setLoading] = useState(true);
+  const [exerciseHistory, setExerciseHistory] = useState<ExerciseHistroy>({
+    name: "",
+    history: [],
+  });
   const [open, setOpen] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
   const [session, setSession] = useState<Session>({
     id: "",
     date: "",
@@ -45,6 +71,18 @@ export default function ViewSession(props: any) {
     }
 
     setOpen(false);
+  };
+
+  const handleModalClose = (
+    event: React.SyntheticEvent | Event,
+    reason?: string
+  ) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setExerciseHistory({ name: "", history: [] });
+    setOpenModal(false);
   };
 
   const saveSession = async () => {
@@ -193,6 +231,14 @@ export default function ViewSession(props: any) {
     await saveSession();
   };
 
+  const titleClick = async (exerciseName: string) => {
+    const data = await api.get<ExerciseHistroy>(`/history/${exerciseName}`);
+
+    setExerciseHistory(data.data);
+
+    setOpenModal(true);
+  };
+
   useEffect(() => {
     refreshData();
   }, []);
@@ -213,31 +259,39 @@ export default function ViewSession(props: any) {
             <Grid key={`${e.name}-${e.set}`} xs={12} lg={3}>
               <Card sx={{ margin: "1rem" }}>
                 <CardContent>
-                  <IconButton
-                    aria-label="delete"
-                    style={{ float: "right" }}
-                    onClick={() => removeExercise(e)}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                  <Typography>
-                    {e.set}. {e.name}
-                  </Typography>
-                  <TextField
-                    sx={{ my: 2 }}
-                    label="Reps"
-                    variant="outlined"
-                    value={e.reps}
-                    onChange={(evt) => handleRepsChange(evt, e)}
-                  />
-                  <TextField
-                    sx={{ my: 2 }}
-                    label="Weight"
-                    variant="outlined"
-                    value={e.weight}
-                    onChange={(evt) => handleWeightChange(evt, e)}
-                    onBlur={handleOnBlur}
-                  />
+                  <Grid container>
+                    <Grid xs={10}>
+                      <ExerciseTitle name={e.name} set={e.set} />
+                    </Grid>
+                    <IconButton
+                      aria-label="delete"
+                      style={{ float: "right" }}
+                      onClick={() => removeExercise(e)}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                    <Grid xs={12}>
+                      <TextField
+                        sx={{ my: 2 }}
+                        label="Reps"
+                        variant="outlined"
+                        type="number"
+                        value={e.reps}
+                        onChange={(evt) => handleRepsChange(evt, e)}
+                      />
+                    </Grid>
+                    <Grid xs={12}>
+                      <TextField
+                        sx={{ my: 2 }}
+                        label="Weight"
+                        variant="outlined"
+                        type="number"
+                        value={e.weight}
+                        onChange={(evt) => handleWeightChange(evt, e)}
+                        onBlur={handleOnBlur}
+                      />
+                    </Grid>
+                  </Grid>
                 </CardContent>
               </Card>
             </Grid>
@@ -245,30 +299,42 @@ export default function ViewSession(props: any) {
         </Grid>
         <Card sx={{ margin: "1rem" }}>
           <CardContent>
-            <TextField
-              sx={{ mx: 2 }}
-              label="Exercise"
-              variant="outlined"
-              value={newExercise.name}
-              onChange={(evt) => handleNewExerciseNameChange(evt)}
-            />
-            <TextField
-              sx={{ mx: 2 }}
-              label="Reps"
-              variant="outlined"
-              value={newExercise.reps}
-              onChange={(evt) => handleNewExerciseRepsChange(evt)}
-            />
-            <TextField
-              sx={{ mx: 2 }}
-              label="Weight"
-              variant="outlined"
-              value={newExercise.weight}
-              onChange={(evt) => handleNewExerciseWeightChange(evt)}
-            />
-            <Button variant="outlined" onClick={addNewExerciseToSession}>
-              Add +
-            </Button>
+            <Grid container>
+              <Grid>
+                <TextField
+                  sx={{ mx: 1 }}
+                  label="Exercise"
+                  variant="outlined"
+                  value={newExercise.name}
+                  onChange={(evt) => handleNewExerciseNameChange(evt)}
+                />
+              </Grid>
+              <Grid>
+                <TextField
+                  sx={{ mx: 1 }}
+                  label="Reps"
+                  type="number"
+                  variant="outlined"
+                  value={newExercise.reps}
+                  onChange={(evt) => handleNewExerciseRepsChange(evt)}
+                />
+              </Grid>
+              <Grid>
+                <TextField
+                  sx={{ mx: 1 }}
+                  label="Weight"
+                  variant="outlined"
+                  type="number"
+                  value={newExercise.weight}
+                  onChange={(evt) => handleNewExerciseWeightChange(evt)}
+                />
+              </Grid>
+              <Grid>
+                <Button variant="outlined" onClick={addNewExerciseToSession}>
+                  Add +
+                </Button>
+              </Grid>
+            </Grid>
           </CardContent>
         </Card>
         <Button sx={{ my: 2 }} variant="outlined" onClick={saveSession}>

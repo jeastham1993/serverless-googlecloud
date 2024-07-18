@@ -73,14 +73,6 @@ func AuthJWT(client *auth.Client) gin.HandlerFunc {
 			return
 		}
 
-		if tokenInfo.UID != os.Getenv("ALLOWED_USER_ID") {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"code":    http.StatusUnauthorized,
-				"message": http.StatusText(http.StatusUnauthorized),
-			})
-			return
-		}
-
 		c.Set(userId, tokenInfo.UID)
 		c.Next()
 	}

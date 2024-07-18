@@ -26,25 +26,32 @@ const auth = getAuth(app);
 
 getRedirectResult(auth)
   .then((result) => {
+    console.log("Handling sign-in result");
+    if (result === null) {
+      console.log('Result is null');
+      return;
+    }
+
     // This is the signed-in user
     const user = result!.user;
+
     // This gives you a Facebook Access Token.
     const credential = GoogleAuthProvider.credentialFromResult(result!)!;
+
+    console.log(credential);
+
+    console.log(user);
 
     user.getIdToken(true).then((token) => {
       localStorage.setItem("token", token);
       localStorage.setItem("refreshToken", user.refreshToken);
       localStorage.setItem("emailAddress", user.email!);
 
-      window.location.href = '/';
+      window.location.href = "/";
     });
   })
   .catch((error) => {
-    // Handle Errors here.
-    const errorCode = error.code;
-    const errorMessage = error.message;
-    // The email of the user's account used.
-    const email = error.customData.email;
+    console.log(error);
     // The AuthCredential type that was used.
     const credential = GoogleAuthProvider.credentialFromError(error);
     // ...

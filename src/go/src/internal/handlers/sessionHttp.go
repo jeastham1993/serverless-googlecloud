@@ -64,6 +64,23 @@ func (hdl *SessionHTTPHandler) PostFromWorkout(c *gin.Context) {
 	c.JSON(200, session)
 }
 
+func (hdl *SessionHTTPHandler) DuplicateSession(c *gin.Context) {
+	var command ports.DuplicateSessionCommand
+
+	if err := c.BindJSON(&command); err != nil {
+		slog.Error(err.Error())
+		return
+	}
+
+	session, err := hdl.sessionService.DuplicateSession(c.Request.Context(), command)
+	if err != nil {
+		c.AbortWithStatusJSON(500, gin.H{"message": err.Error()})
+		return
+	}
+
+	c.JSON(200, session)
+}
+
 func (hdl *SessionHTTPHandler) Update(c *gin.Context) {
 	var session domain.SessionDTO
 

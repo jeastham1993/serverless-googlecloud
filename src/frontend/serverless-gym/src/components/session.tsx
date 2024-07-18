@@ -24,6 +24,7 @@ import { getAuth } from "firebase/auth";
 import { isAuthenticated } from "../services/authService";
 import { api } from "../axiosConfig";
 import { Session, SessionExercise } from "../models/session";
+import ExerciseTitle from "./exerciseTitle";
 
 const style = {
   position: "absolute" as "absolute",
@@ -44,6 +45,7 @@ export default function SessionPage() {
   const [data, setData] = useState<Session[]>([]);
   const [isLoading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
+  const [newSessionName, setNewSessionName] = useState("");
   const [session, setSession] = useState<Session>({
     id: "",
     date: "",
@@ -74,6 +76,25 @@ export default function SessionPage() {
     setSession(session);
 
     handleOpen();
+  };
+
+  const startSessionFromSession = async (sessionId: string) => {
+    if (newSessionName.length === 0) {
+      return;
+    }
+
+    const postResponse = await api.post<Session>("/session/duplicate", {
+      sessionId,
+      name: newSessionName,
+    });
+
+    console.log(postResponse);
+
+    navigate(`${encodeURIComponent(postResponse.data.id)}`);
+  };
+
+  const handleNewSessionNameChange = (e: any) => {
+    setNewSessionName(e.target.value);
   };
 
   const handleRepsChange = (
@@ -128,8 +149,7 @@ export default function SessionPage() {
   };
 
   const getLink = (session: Session) => {
-    const link = `sessions/${encodeURIComponent(session.id)}`;
-    console.log(link);
+    const link = `session/${encodeURIComponent(session.id)}`;
     return link;
   };
 
@@ -150,33 +170,57 @@ export default function SessionPage() {
                 <Typography variant="h3">
                   <Link href={getLink(d)}>{d.id}</Link>
                 </Typography>
-                <TableContainer component={Paper}>
-                  <Table sx={{ minWidth: 650 }} aria-label="simple table">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Name</TableCell>
-                        <TableCell>Reps</TableCell>
-                        <TableCell>Weight</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {d.exercises.map((e) => (
-                        <TableRow
-                          key={`${e.name}-${e.set}`}
-                          sx={{
-                            "&:last-child td, &:last-child th": { border: 0 },
-                          }}
-                        >
-                          <TableCell component="th" scope="row">
-                            {e.name}
-                          </TableCell>
-                          <TableCell>{e.reps}</TableCell>
-                          <TableCell>{e.weight}</TableCell>
+                <Grid>
+                  <TableContainer component={Paper}>
+                    <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Name</TableCell>
+                          <TableCell>Reps</TableCell>
+                          <TableCell>Weight</TableCell>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
+                      </TableHead>
+                      <TableBody>
+                        {d.exercises.map((e) => (
+                          <TableRow
+                            key={`${e.name}-${e.set}`}
+                            sx={{
+                              "&:last-child td, &:last-child th": { border: 0 },
+                            }}
+                          >
+                            <TableCell component="th" scope="row">
+                              <ExerciseTitle name={e.name} set={e.set} />
+                            </TableCell>
+                            <TableCell>{e.reps}</TableCell>
+                            <TableCell>{e.weight}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </Grid>
+                <Grid container>
+                  <Grid>
+                    <TextField
+                      sx={{ my: 1, mx: 1 }}
+                      label="Session Name"
+                      variant="outlined"
+                      value={newSessionName}
+                      onChange={handleNewSessionNameChange}
+                    />
+                  </Grid>
+                  <Grid>
+                    <Button
+                      variant="contained"
+                      sx={{ my: 2 }}
+                      onClick={() => startSessionFromSession(d.id)}
+                      item
+                      style={{ display: "flex" }}
+                    >
+                      Start Session
+                    </Button>
+                  </Grid>
+                </Grid>
                 <Divider sx={{ my: 2 }} />
               </Box>
             ))}

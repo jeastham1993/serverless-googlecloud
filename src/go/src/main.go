@@ -81,6 +81,7 @@ func main() {
 	router.GET("/session/:id", sessionHandler.Get)
 	router.PUT("/session/:id", sessionHandler.Update)
 	router.POST("/session/from", sessionHandler.PostFromWorkout)
+	router.POST("/session/duplicate", sessionHandler.DuplicateSession)
 	router.POST("/session/finish", sessionHandler.Finish)
 
 	router.GET("/history/:name", historyHandlers.Get)
