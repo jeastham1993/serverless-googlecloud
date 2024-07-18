@@ -28,3 +28,4 @@ go.work.sum
 **/*.tfstate*
 **/.DS_Store
 src/go/infra/dev.tfvars
+src/frontend/serverless-gym/firebase-debug.log
