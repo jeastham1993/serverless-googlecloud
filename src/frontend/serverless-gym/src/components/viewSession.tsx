@@ -8,22 +8,15 @@ import {
   Snackbar,
   TextField,
   Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Modal,
 } from "@mui/material";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Unstable_Grid2";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { api } from "../axiosConfig";
 import { Session, SessionExercise } from "../models/session";
 import { ExerciseHistroy } from "../models/exerciseHistory";
 import ExerciseTitle from "./exerciseTitle";
+import { ApiService } from "../services/apiService";
+import ExerciseTile from "./exerciseTile";
 
 const style = {
   my: 2,
@@ -44,12 +37,7 @@ export default function ViewSession(props: any) {
   const { id } = useParams();
   const navigate = useNavigate();
   const [isLoading, setLoading] = useState(true);
-  const [exerciseHistory, setExerciseHistory] = useState<ExerciseHistroy>({
-    name: "",
-    history: [],
-  });
   const [open, setOpen] = useState(false);
-  const [openModal, setOpenModal] = useState(false);
   const [session, setSession] = useState<Session>({
     id: "",
     date: "",
@@ -61,6 +49,7 @@ export default function ViewSession(props: any) {
     weight: 0,
     set: 0,
   });
+  const apiService = new ApiService(navigate);
 
   const handleClose = (
     event: React.SyntheticEvent | Event,
@@ -73,22 +62,14 @@ export default function ViewSession(props: any) {
     setOpen(false);
   };
 
-  const handleModalClose = (
-    event: React.SyntheticEvent | Event,
-    reason?: string
-  ) => {
-    if (reason === "clickaway") {
-      return;
-    }
-
-    setExerciseHistory({ name: "", history: [] });
-    setOpenModal(false);
-  };
-
   const saveSession = async () => {
-    await api.put(`/session/${session.id}`, session);
+    await apiService.saveSession(session);
 
     setOpen(true);
+  };
+
+  const finishSession = async () => {
+    await apiService.finishSession(session);
   };
 
   const handleRepsChange = (
@@ -220,23 +201,14 @@ export default function ViewSession(props: any) {
   };
 
   const refreshData = async () => {
-    console.log(id);
-    const data = await api.get(`/session/${id}`);
+    const data = await apiService.getSession(id);
 
-    setSession(data.data);
+    setSession(data);
     setLoading(false);
   };
 
   const handleOnBlur = async (evt: any) => {
     await saveSession();
-  };
-
-  const titleClick = async (exerciseName: string) => {
-    const data = await api.get<ExerciseHistroy>(`/history/${exerciseName}`);
-
-    setExerciseHistory(data.data);
-
-    setOpenModal(true);
   };
 
   useEffect(() => {
@@ -257,43 +229,14 @@ export default function ViewSession(props: any) {
         <Grid container>
           {session.exercises.map((e) => (
             <Grid key={`${e.name}-${e.set}`} xs={12} lg={3}>
-              <Card sx={{ margin: "1rem" }}>
-                <CardContent>
-                  <Grid container>
-                    <Grid xs={10}>
-                      <ExerciseTitle name={e.name} set={e.set} />
-                    </Grid>
-                    <IconButton
-                      aria-label="delete"
-                      style={{ float: "right" }}
-                      onClick={() => removeExercise(e)}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                    <Grid xs={12}>
-                      <TextField
-                        sx={{ my: 2 }}
-                        label="Reps"
-                        variant="outlined"
-                        type="number"
-                        value={e.reps}
-                        onChange={(evt) => handleRepsChange(evt, e)}
-                      />
-                    </Grid>
-                    <Grid xs={12}>
-                      <TextField
-                        sx={{ my: 2 }}
-                        label="Weight"
-                        variant="outlined"
-                        type="number"
-                        value={e.weight}
-                        onChange={(evt) => handleWeightChange(evt, e)}
-                        onBlur={handleOnBlur}
-                      />
-                    </Grid>
-                  </Grid>
-                </CardContent>
-              </Card>
+              <ExerciseTile
+                exercise={e}
+                readOnly={false}
+                onDeleteExercise={(e: SessionExercise) => removeExercise(e)}
+                onRepsChange={(evt, e) => handleRepsChange(evt, e)}
+                onWeightChange={(evt, e) => handleWeightChange(evt, e)}
+                onWeightBlur={(evt) => handleOnBlur(evt)}
+              />
             </Grid>
           ))}
         </Grid>
@@ -337,8 +280,8 @@ export default function ViewSession(props: any) {
             </Grid>
           </CardContent>
         </Card>
-        <Button sx={{ my: 2 }} variant="outlined" onClick={saveSession}>
-          Save Session
+        <Button sx={{ my: 2 }} variant="outlined" onClick={finishSession}>
+          Finish Session
         </Button>
       </Box>
       <Snackbar

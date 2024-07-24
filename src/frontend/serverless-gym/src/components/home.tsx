@@ -18,11 +18,11 @@ import Box from "@mui/material/Box";
 import Grid from "@mui/material/Unstable_Grid2"; // Grid version 2
 import Divider from "@mui/material/Divider";
 import AddIcon from "@mui/icons-material/Add";
-import { api } from "../axiosConfig";
 import { isAuthenticated } from "../services/authService";
 import { Session } from "../models/session";
 import { Exercise, Workout } from "../models/workout";
 import ExerciseTitle from "./exerciseTitle";
+import { ApiService } from "../services/apiService";
 
 const style = {
   position: "absolute",
@@ -37,6 +37,7 @@ const style = {
 
 export default function Home() {
   const navigate = useNavigate();
+  const apiService = new ApiService(navigate);
   const [data, setData] = useState<Workout[]>([]);
   const [isLoading, setLoading] = useState(true);
   const [newSessionName, setNewSessionName] = useState("");
@@ -101,20 +102,17 @@ export default function Home() {
       return;
     }
 
-    const postResponse = await api.post<Session>("/session/from", {
+    const postResponse = await apiService.startSessionFromWorkout(
       workoutId,
-      name: newSessionName,
-    });
-
+      newSessionName
+    );
     console.log(postResponse);
 
-    navigate(`session/${encodeURIComponent(postResponse.data.id)}`);
+    navigate(`session/${encodeURIComponent(postResponse.id)}`);
   };
 
   const saveWorkout = async () => {
-    console.log(newWorkout);
-
-    const postResponse = await api.post("/workout", newWorkout);
+    await apiService.saveWorkout(newWorkout);
 
     handleClose();
   };
@@ -124,9 +122,9 @@ export default function Home() {
       navigate("/login");
     }
 
-    const data = await api.get<Workout[]>("/workout");
+    const data = await apiService.getWorkouts();
 
-    setData(data.data);
+    setData(data);
     setLoading(false);
   };
 

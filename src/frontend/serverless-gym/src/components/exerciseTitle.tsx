@@ -11,8 +11,9 @@ import {
   Modal,
 } from "@mui/material";
 import Box from "@mui/material/Box";
-import { api } from "../axiosConfig";
 import { ExerciseHistroy } from "../models/exerciseHistory";
+import { ApiService } from "../services/apiService";
+import { useNavigate } from "react-router-dom";
 
 const style = {
   my: 2,
@@ -51,11 +52,13 @@ export default function ExerciseTitle(props: ExerciseTitleProps) {
     setExerciseHistory({ name: "", history: [] });
     setOpenModal(false);
   };
+  const navigate = useNavigate();
+  const apiService = new ApiService(navigate);
 
   const titleClick = async (exerciseName: string) => {
-    const data = await api.get<ExerciseHistroy>(`/history/${exerciseName}`);
+    const data = await apiService.getExerciseHistory(exerciseName);
 
-    setExerciseHistory(data.data);
+    setExerciseHistory(data);
 
     setOpenModal(true);
   };

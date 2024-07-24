@@ -26,21 +26,11 @@ const auth = getAuth(app);
 
 getRedirectResult(auth)
   .then((result) => {
-    console.log("Handling sign-in result");
     if (result === null) {
-      console.log('Result is null');
       return;
     }
 
-    // This is the signed-in user
     const user = result!.user;
-
-    // This gives you a Facebook Access Token.
-    const credential = GoogleAuthProvider.credentialFromResult(result!)!;
-
-    console.log(credential);
-
-    console.log(user);
 
     user.getIdToken(true).then((token) => {
       localStorage.setItem("token", token);
@@ -52,28 +42,16 @@ getRedirectResult(auth)
   })
   .catch((error) => {
     console.log(error);
-    // The AuthCredential type that was used.
-    const credential = GoogleAuthProvider.credentialFromError(error);
-    // ...
   });
 
 export default function Login() {
-  const navigate = useNavigate();
-
   async function toggleSignIn() {
     if (!auth.currentUser) {
       const provider = new GoogleAuthProvider();
+      
+      await signInWithRedirect(auth, provider);
 
-      console.log("Redirecting");
-
-      const res = await signInWithRedirect(auth, provider);
-
-      console.log("Handle result");
-
-      // After returning from the redirect when your app initializes you can obtain the result
-      const result = await getRedirectResult(auth);
-      if (result) {
-      }
+      await getRedirectResult(auth);
     } else {
       signOut(auth);
     }

@@ -22,9 +22,9 @@ import { initializeApp } from "firebase/app";
 import { firebaseConfig } from "../config";
 import { getAuth } from "firebase/auth";
 import { isAuthenticated } from "../services/authService";
-import { api } from "../axiosConfig";
 import { Session, SessionExercise } from "../models/session";
 import ExerciseTitle from "./exerciseTitle";
+import { ApiService } from "../services/apiService";
 
 const style = {
   position: "absolute" as "absolute",
@@ -57,9 +57,10 @@ export default function SessionPage() {
     setSession({ id: "", date: "", exercises: [] });
     setOpen(false);
   };
+  const apiService = new ApiService(navigate);
 
   const saveSession = async () => {
-    const putResponse = await api.put(`/session/${session.id}`, session);
+    await apiService.saveSession(session);
 
     setSession({
       id: "",
@@ -83,14 +84,12 @@ export default function SessionPage() {
       return;
     }
 
-    const postResponse = await api.post<Session>("/session/duplicate", {
+    const postResponse = await apiService.duplicateSession(
       sessionId,
-      name: newSessionName,
-    });
+      newSessionName
+    );
 
-    console.log(postResponse);
-
-    navigate(`${encodeURIComponent(postResponse.data.id)}`);
+    navigate(`${encodeURIComponent(postResponse.id)}`);
   };
 
   const handleNewSessionNameChange = (e: any) => {
@@ -142,9 +141,9 @@ export default function SessionPage() {
   };
 
   const refreshData = async () => {
-    const data = await api.get("/session");
+    const data = await apiService.listSessions();
 
-    setData(data.data);
+    setData(data);
     setLoading(false);
   };
 
