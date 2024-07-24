@@ -42,6 +42,8 @@ func (srv *CloudTasksRunner) StartHistoryUpdateFor(ctx context.Context, session 
 		httpRequestHeaders[name] = values[0]
 	}
 
+	httpRequestHeaders["Authorization"] = os.Getenv("API_KEY")
+
 	req := &taskspb.CreateTaskRequest{
 		Parent: os.Getenv("QUEUE_NAME"),
 		Task: &taskspb.Task{

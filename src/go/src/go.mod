@@ -5,6 +5,7 @@ go 1.22.2
 require (
 	cloud.google.com/go/cloudtasks v1.12.11
 	cloud.google.com/go/firestore v1.15.0
+	cloud.google.com/go/pubsub v1.40.0
 	firebase.google.com/go v3.13.0+incompatible
 	github.com/gin-contrib/cors v1.7.2
 	github.com/gin-gonic/gin v1.10.0

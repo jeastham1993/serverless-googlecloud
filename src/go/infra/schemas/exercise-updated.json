@@ -1,0 +1,17 @@
+{
+    "type" : "record",
+    "name" : "Avro",
+    "fields" : [
+      {
+        "name" : "ExerciseName",
+        "type" : "string",
+        "default": ""
+      },
+      {
+        "name" : "TraceId",
+        "type" : "string",
+        "default": ""
+      }
+    ]
+   }
+   

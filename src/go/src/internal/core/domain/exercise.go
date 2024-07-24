@@ -10,3 +10,8 @@ type ExerciseDTO struct {
 	Sets int    `json:"sets"`
 	Reps int    `json:"reps"`
 }
+
+type ExerciseUpdatedEventV1 struct {
+	ExerciseName string `json:"ExerciseName"`
+	TraceId      string `json:"TraceId"`
+}

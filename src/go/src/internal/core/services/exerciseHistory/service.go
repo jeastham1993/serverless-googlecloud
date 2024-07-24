@@ -11,12 +11,14 @@ import (
 type ExerciseHistoryService struct {
 	exerciseHistoryRepository ports.ExerciseHistoryRepository
 	sessionService            ports.SessionService
+	eventPublisher            ports.EventPublisher
 }
 
-func New(exerciseHistoryRepository ports.ExerciseHistoryRepository, sessionService ports.SessionService) *ExerciseHistoryService {
+func New(exerciseHistoryRepository ports.ExerciseHistoryRepository, sessionService ports.SessionService, eventPublisher ports.EventPublisher) *ExerciseHistoryService {
 	return &ExerciseHistoryService{
 		exerciseHistoryRepository: exerciseHistoryRepository,
 		sessionService:            sessionService,
+		eventPublisher:            eventPublisher,
 	}
 }
 
@@ -69,6 +71,8 @@ func (srv *ExerciseHistoryService) UpdateHistoryRecordFrom(ctx context.Context, 
 		}
 
 		srv.exerciseHistoryRepository.UpdateHistoryRecord(ctx, exerciseHistory)
+
+		srv.eventPublisher.PublishExerciseUpdatedEvent(ctx, exerciseHistory)
 	}
 }
 

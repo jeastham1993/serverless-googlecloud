@@ -39,6 +39,7 @@ func main() {
 	defer firestoreClient.Close()
 
 	taskRunner := adapters.NewCloudTaskRunner(&gin.Context{})
+	eventPublisher := adapters.NewPubSubEventPublisher(&gin.Context{})
 
 	firestoreRepository := workoutrepo.NewFirestoreRepository(firestoreClient)
 	workoutService := services.New(firestoreRepository)
@@ -49,7 +50,7 @@ func main() {
 	sessionHandler := handlers.NewSessionHTTPHandler(sessionService)
 
 	historyRepository := historyrepo.NewFirestoreRepository(firestoreClient)
-	historyService := exerciseHistoryService.New(historyRepository, sessionService)
+	historyService := exerciseHistoryService.New(historyRepository, sessionService, eventPublisher)
 	historyHandlers := handlers.NewExerciseHistoryHTTPHandler(historyService)
 
 	router := gin.New()

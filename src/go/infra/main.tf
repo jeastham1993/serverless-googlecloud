@@ -50,6 +50,15 @@ resource "google_cloud_run_v2_service" "default" {
         }
       }
       env {
+        name = "API_KEY"
+        value_source {
+          secret_key_ref {
+            secret  = "projects/854841797518/secrets/api-key"
+            version = "1"
+          }
+        }
+      }
+      env {
         name  = "DD_TRACE_ENABLED"
         value = "true"
       }
@@ -68,6 +77,10 @@ resource "google_cloud_run_v2_service" "default" {
       env {
         name  = "APP_URL"
         value = "https://gcloud-go-7tq7m2dbcq-nw.a.run.app"
+      }
+      env {
+        name  = "EXERCISE_UPDATED_TOPIC_ID"
+        value = google_pubsub_topic.exercise_updated.name
       }
       env {
         name  = "QUEUE_NAME"
@@ -110,6 +123,12 @@ resource "google_secret_manager_secret_iam_member" "secret-access" {
   member    = "serviceAccount:${google_service_account.cloudrun_service_identity.email}"
 }
 
+resource "google_secret_manager_secret_iam_member" "api-key-secret-access" {
+  secret_id = "projects/854841797518/secrets/api-key"
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.cloudrun_service_identity.email}"
+}
+
 resource "google_project_iam_member" "firestore-access" {
   project = data.google_project.project.project_id
   role    = "roles/datastore.user"
@@ -122,8 +141,8 @@ resource "google_project_iam_member" "cloudtasks-access" {
   member  = "serviceAccount:${google_service_account.cloudrun_service_identity.email}"
 }
 
-# resource "google_project_iam_member" "cloudtasks-access" {
-#   project = data.google_project.project.project_id
-#   role    = "roles/cloudtasks.enqueuer"
-#   member  = "serviceAccount:${google_service_account.cloudrun_service_identity.email}"
-# }
+resource "google_project_iam_member" "pubsub-access" {
+  project = data.google_project.project.project_id
+  role    = "roles/pubsub.publisher"
+  member  = "serviceAccount:${google_service_account.cloudrun_service_identity.email}"
+}

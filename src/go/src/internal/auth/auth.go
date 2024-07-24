@@ -61,19 +61,27 @@ func AuthJWT(client *auth.Client) gin.HandlerFunc {
 		defer span.Finish()
 
 		authHeader := c.Request.Header.Get(authorizationHeader)
-		token := strings.Replace(authHeader, "Bearer ", "", 1)
 
-		tokenInfo, err := ValidateFirebaseToken(client, token)
+		apiKey := os.Getenv("API_KEY")
 
-		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"code":    http.StatusUnauthorized,
-				"message": http.StatusText(http.StatusUnauthorized),
-			})
-			return
+		if apiKey == authHeader {
+			c.Set(userId, "internal")
+			c.Next()
+		} else {
+			token := strings.Replace(authHeader, "Bearer ", "", 1)
+
+			tokenInfo, err := ValidateFirebaseToken(client, token)
+
+			if err != nil {
+				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+					"code":    http.StatusUnauthorized,
+					"message": http.StatusText(http.StatusUnauthorized),
+				})
+				return
+			}
+
+			c.Set(userId, tokenInfo.UID)
+			c.Next()
 		}
-
-		c.Set(userId, tokenInfo.UID)
-		c.Next()
 	}
 }
