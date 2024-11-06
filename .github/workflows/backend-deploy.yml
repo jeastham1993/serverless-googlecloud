@@ -26,10 +26,7 @@ jobs:
         name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
-          project_id: "serverless-sandbox-429409"
-          create_credentials_file: true
-          workload_identity_provider: "${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}"
-          service_account: "${{ secrets.SERVICE_ACCOUNT }}"
+          credentials_json: '${{ secrets.GOOGLE_SECRET }}' # Replace with the name of your GitHub Actions secret
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
       - name: set credentials file
