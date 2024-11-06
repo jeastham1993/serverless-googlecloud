@@ -54,6 +54,8 @@ func (srv *ExerciseHistoryService) UpdateHistoryRecordFrom(ctx context.Context, 
 		}
 	}
 
+	newHistoryRecords := []domain.ExerciseHistoryRecord{}
+
 	for _, exerciseName := range unique {
 		slog.Info("Processing " + exerciseName)
 
@@ -61,18 +63,22 @@ func (srv *ExerciseHistoryService) UpdateHistoryRecordFrom(ctx context.Context, 
 
 		for _, sessionExercise := range sessionData.Exercises {
 			if exerciseName == sessionExercise.Name {
-				exerciseHistory.History = append(exerciseHistory.History, domain.ExerciseHistoryRecord{
+				newRecord := domain.ExerciseHistoryRecord{
 					Date:   sessionData.Date,
 					Set:    sessionExercise.Set,
 					Reps:   sessionExercise.Reps,
 					Weight: sessionExercise.Weight,
-				})
+				}
+
+				newHistoryRecords = append(newHistoryRecords, newRecord)
+				exerciseHistory.History = append(exerciseHistory.History, newRecord)
+
 			}
 		}
 
 		srv.exerciseHistoryRepository.UpdateHistoryRecord(ctx, exerciseHistory)
 
-		srv.eventPublisher.PublishExerciseUpdatedEvent(ctx, exerciseHistory)
+		srv.eventPublisher.PublishExerciseUpdatedEvent(ctx, exerciseHistory, newHistoryRecords)
 	}
 }
 

@@ -6,5 +6,5 @@ import (
 )
 
 type EventPublisher interface {
-	PublishExerciseUpdatedEvent(ctx context.Context, e domain.ExerciseHistory)
+	PublishExerciseUpdatedEvent(ctx context.Context, e domain.ExerciseHistory, new_records []domain.ExerciseHistoryRecord)
 }

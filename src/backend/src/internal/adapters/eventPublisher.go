@@ -23,7 +23,7 @@ func NewPubSubEventPublisher(ctx context.Context) *PubSubEventPublisher {
 	return &PubSubEventPublisher{client: c}
 }
 
-func (srv *PubSubEventPublisher) PublishExerciseUpdatedEvent(ctx context.Context, e domain.ExerciseHistory) {
+func (srv *PubSubEventPublisher) PublishExerciseUpdatedEvent(ctx context.Context, e domain.ExerciseHistory, newRecords []domain.ExerciseHistoryRecord) {
 	span, ctx := tracer.StartSpanFromContext(ctx, "start.publishEvent")
 	defer span.Finish()
 
@@ -32,12 +32,12 @@ func (srv *PubSubEventPublisher) PublishExerciseUpdatedEvent(ctx context.Context
 
 	history := []domain.ExerciseHistoryRecordDTO{}
 
-	for index := range e.History {
+	for index := range newRecords {
 		historyRecord := domain.ExerciseHistoryRecordDTO{
-			Date:   e.History[index].Date,
-			Set:    e.History[index].Set,
-			Weight: e.History[index].Weight,
-			Reps:   e.History[index].Reps,
+			Date:   newRecords[index].Date,
+			Set:    newRecords[index].Set,
+			Weight: newRecords[index].Weight,
+			Reps:   newRecords[index].Reps,
 		}
 
 		history = append(history, historyRecord)
