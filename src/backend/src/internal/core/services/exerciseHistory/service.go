@@ -54,9 +54,9 @@ func (srv *ExerciseHistoryService) UpdateHistoryRecordFrom(ctx context.Context, 
 		}
 	}
 
-	newHistoryRecords := []domain.ExerciseHistoryRecord{}
-
 	for _, exerciseName := range unique {
+		newHistoryRecords := []domain.ExerciseHistoryRecord{}
+
 		slog.Info("Processing " + exerciseName)
 
 		exerciseHistory := srv.GetOrCreate(ctx, exerciseName)
