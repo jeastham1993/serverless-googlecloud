@@ -12,6 +12,7 @@ type ExerciseDTO struct {
 }
 
 type ExerciseUpdatedEventV1 struct {
-	ExerciseName string `json:"ExerciseName"`
-	TraceId      string `json:"TraceId"`
+	ExerciseName string                     `json:"ExerciseName"`
+	History      []ExerciseHistoryRecordDTO `json:"History"`
+	TraceId      string                     `json:"TraceId"`
 }

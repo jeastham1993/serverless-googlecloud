@@ -30,8 +30,22 @@ func (srv *PubSubEventPublisher) PublishExerciseUpdatedEvent(ctx context.Context
 	topic := srv.client.Topic(os.Getenv("EXERCISE_UPDATED_TOPIC_ID"))
 	defer topic.Stop()
 
+	history := []domain.ExerciseHistoryRecordDTO{}
+
+	for index := range e.History {
+		historyRecord := domain.ExerciseHistoryRecordDTO{
+			Date:   e.History[index].Date,
+			Set:    e.History[index].Set,
+			Weight: e.History[index].Weight,
+			Reps:   e.History[index].Reps,
+		}
+
+		history = append(history, historyRecord)
+	}
+
 	evt := domain.ExerciseUpdatedEventV1{
 		ExerciseName: e.Name,
+		History:      history,
 		TraceId:      strconv.FormatUint(span.Context().TraceID(), 10),
 	}
 
