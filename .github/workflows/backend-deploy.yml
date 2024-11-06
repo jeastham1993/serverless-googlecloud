@@ -9,6 +9,7 @@ on:
       - main
     paths:
       - src/backend/**
+      - ./github/**
 
 permissions:
     contents: read
