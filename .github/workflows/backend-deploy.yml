@@ -1,5 +1,6 @@
 env:
   GCP_REGION: europe-west2
+  IMAGE_TAG: pipeline
 
 name: Backend Deploy
 on:
@@ -36,10 +37,10 @@ jobs:
           gcloud auth login --cred-file=${{steps.auth.outputs.credentials_file_path}}
       - name: Use gcloud CLI
         run: gcloud info
-      - name: Declare some variables
-        shell: bash
-        run: |
-          echo "sha_short=$(git rev-parse --short "$GITHUB_SHA")" >> "$IMAGE_TAG"
+    #   - name: Declare some variables
+    #     shell: bash
+    #     run: |
+    #       echo "sha_short=$(git rev-parse --short "$GITHUB_SHA")" >> "$IMAGE_TAG"
       - name: Run Build
         shell: bash
         run: |
