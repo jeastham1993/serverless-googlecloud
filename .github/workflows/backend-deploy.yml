@@ -1,3 +1,6 @@
+env:
+  GCP_REGION: europe-west2
+
 name: Backend Deploy
 on:
   workflow_dispatch:
@@ -7,29 +10,37 @@ on:
     paths:
       - src/backend/**
 jobs:
-    build:
-        runs-on: ubuntu-latest
-        permissions:
-          contents: read
-          id-token: write
-        steps:
-          - name: Checkout actions-oidc-debugger
-            uses: actions/checkout@v3
-          - id: auth
-            name: Authenticate to Google Cloud
-            uses: google-github-actions/auth@v2
-            with:
-              project_id: "serverless-sandbox-429409"
-              create_credentials_file: true
-              workload_identity_provider: '${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}'
-              service_account: '${{ secrets.SERVICE_ACCOUNT }}'
-          - name: Set up Cloud SDK
-            uses: google-github-actions/setup-gcloud@v2
-          - name: set credentials file
-            run: >-
-              gcloud auth login
-              --cred-file=${{steps.auth.outputs.credentials_file_path}}
-          - name: Use gcloud CLI
-            run: gcloud info
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout actions-oidc-debugger
+        uses: actions/checkout@v3
+      - id: auth
+        name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: "serverless-sandbox-429409"
+          create_credentials_file: true
+          workload_identity_provider: "${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}"
+          service_account: "${{ secrets.SERVICE_ACCOUNT }}"
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+      - name: set credentials file
+        run: >-
+          gcloud auth login
+          --cred-file=${{steps.auth.outputs.credentials_file_path}}
+      - name: Use gcloud CLI
+        run: gcloud info
 
+      - name: Declare some variables
+        shell: bash
+        run: |
+          echo "sha_short=$(git rev-parse --short "$GITHUB_SHA")" >> "$IMAGE_TAG"
 
+      - name: Run Build
+        shell: bash
+        run: |
+          make build
