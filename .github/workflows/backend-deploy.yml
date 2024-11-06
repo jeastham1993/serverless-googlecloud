@@ -48,4 +48,4 @@ jobs:
         env:
             IMAGE_TAG: ${{env.sha_short}}
         run: |
-          make deploy
+          make deploy-ci
