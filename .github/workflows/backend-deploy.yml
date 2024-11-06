@@ -9,6 +9,7 @@ on:
       - main
     paths:
       - src/backend/**
+      - Makefile
       - ./github/**
 
 permissions:
