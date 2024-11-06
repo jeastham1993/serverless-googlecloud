@@ -6,6 +6,7 @@ import (
 	"gcloud-serverless-gym/internal/core/domain"
 	"gcloud-serverless-gym/internal/core/ports"
 	"log/slog"
+	"sort"
 )
 
 type SessionService struct {
@@ -130,7 +131,17 @@ func (srv *SessionService) List(ctx context.Context) []domain.SessionDTO {
 		sessionList = append(sessionList, sessions[w].AsDto())
 	}
 
-	return sessionList
+	sort.Slice(sessionList, func(i, j int) bool {
+		return sessionList[i].Date.After(sessionList[j].Date)
+	})
+
+	var max = 10
+
+	if len(sessionList) < 10 {
+		max = len(sessionList)
+	}
+
+	return sessionList[:max]
 }
 
 func (srv *SessionService) FinishSession(ctx context.Context, command ports.FinishSessionCommand) (domain.SessionDTO, error) {

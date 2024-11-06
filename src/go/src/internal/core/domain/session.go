@@ -34,7 +34,7 @@ func (w *Session) AsDto() SessionDTO {
 		exercises = append(exercises, SessionExerciseDTO{Name: exercise.Name, Set: exercise.Set, Reps: exercise.Reps, Weight: exercise.Weight})
 	}
 
-	workoutDto := SessionDTO{Id: w.Id, Date: w.Date, Exercises: exercises}
+	workoutDto := SessionDTO{Id: w.Id, Date: w.Date, Exercises: exercises, Status: w.Status}
 
 	return workoutDto
 }
@@ -47,4 +47,5 @@ type SessionDTO struct {
 	Id        string               `json:"id"`
 	Date      time.Time            `json:"date"`
 	Exercises []SessionExerciseDTO `json:"exercises"`
+	Status    string               `json:"status"`
 }

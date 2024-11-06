@@ -4,7 +4,6 @@ import {
   Button,
   Card,
   CardContent,
-  IconButton,
   Snackbar,
   TextField,
   Typography,
@@ -33,6 +32,12 @@ const modalStyle = {
   p: 4,
 };
 
+export interface NewExercise {
+  name: "";
+  sets: 0;
+  repsPerSet: 0
+}
+
 export default function ViewSession(props: any) {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -42,12 +47,12 @@ export default function ViewSession(props: any) {
     id: "",
     date: "",
     exercises: [],
+    status: "",
   });
-  const [newExercise, setNewExercise] = useState<SessionExercise>({
+  const [newExercise, setNewExercise] = useState<NewExercise>({
     name: "",
-    reps: 0,
-    weight: 0,
-    set: 0,
+    sets: 0,
+    repsPerSet: 0
   });
   const apiService = new ApiService(navigate);
 
@@ -62,7 +67,7 @@ export default function ViewSession(props: any) {
     setOpen(false);
   };
 
-  const saveSession = async () => {
+  const saveSession = async (session: Session) => {
     await apiService.saveSession(session);
 
     setOpen(true);
@@ -70,6 +75,7 @@ export default function ViewSession(props: any) {
 
   const finishSession = async () => {
     await apiService.finishSession(session);
+    setOpen(true);
   };
 
   const handleRepsChange = (
@@ -118,8 +124,6 @@ export default function ViewSession(props: any) {
       return;
     }
 
-    console.log(parsedInt);
-
     const newSession: SessionExercise = {
       name: exercise.name,
       set: exercise.set,
@@ -141,13 +145,13 @@ export default function ViewSession(props: any) {
   const handleNewExerciseRepsChange = (
     e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
   ) => {
-    setNewExercise({ ...newExercise, reps: parseInt(e.target.value) });
+    setNewExercise({ ...newExercise, repsPerSet: parseInt(e.target.value) });
   };
 
-  const handleNewExerciseWeightChange = (
+  const handleNewExerciseSetsChange = (
     e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
   ) => {
-    setNewExercise({ ...newExercise, weight: parseFloat(e.target.value) });
+    setNewExercise({ ...newExercise, sets: parseFloat(e.target.value) });
   };
 
   const handleNewExerciseNameChange = (
@@ -158,32 +162,37 @@ export default function ViewSession(props: any) {
 
   const addNewExerciseToSession = (e: any) => {
     const existingExercises = session.exercises;
-    const matchedExercises = existingExercises.filter(
-      (e) => e.name === newExercise.name
-    );
 
-    const exercise = newExercise;
+    for (let index = 0; index < newExercise.sets; index++) {
+      const matchedExercises = existingExercises.filter(
+        (e) => e.name === newExercise.name
+      );
 
-    if (matchedExercises.length > 0) {
-      const exercise = newExercise;
-      exercise.set = matchedExercises.length + 1;
-    } else {
-      exercise.set = 1;
+      let exercise: SessionExercise = {
+        name: newExercise.name,
+        weight: 0,
+        reps: newExercise.repsPerSet,
+        set: 0
+      };
+
+      if (matchedExercises.length > 0) {
+        exercise.set = matchedExercises.length + 1;
+      } else {
+        exercise.set = 1;
+      }
+
+      existingExercises.push(exercise);
+      existingExercises.sort((a, b) => {
+        const aSortValue = `${a.name}-${a.set}`;
+        const bSortValue = `${b.name}-${b.set}`;
+
+        return aSortValue.localeCompare(bSortValue);
+      });
     }
-
-    existingExercises.push(exercise);
-    existingExercises.sort((a, b) => {
-      const aSortValue = `${a.name}-${a.set}`;
-      const bSortValue = `${b.name}-${b.set}`;
-
-      return aSortValue.localeCompare(bSortValue);
-    });
-
-    console.log(existingExercises);
 
     setSession({ ...session, exercises: existingExercises });
 
-    saveSession();
+    saveSession({ ...session, exercises: existingExercises });
   };
 
   const removeExercise = (exercise: SessionExercise) => {
@@ -197,7 +206,7 @@ export default function ViewSession(props: any) {
 
     setSession({ ...session, exercises: newExercises });
 
-    saveSession();
+    saveSession({ ...session, exercises: newExercises });
   };
 
   const refreshData = async () => {
@@ -208,7 +217,7 @@ export default function ViewSession(props: any) {
   };
 
   const handleOnBlur = async (evt: any) => {
-    await saveSession();
+    await saveSession(session);
   };
 
   useEffect(() => {
@@ -220,11 +229,19 @@ export default function ViewSession(props: any) {
       <Box sx={style}>
         <Typography
           id="modal-modal-title"
-          variant="h5"
-          component="h5"
+          variant="h2"
+          component="h2"
           sx={{ my: 2 }}
         >
           {session.id}
+        </Typography>
+        <Typography
+          id="session-status"
+          variant="p"
+          component="p"
+          sx={{ my: 2 }}
+        >
+          Status: {session.status}
         </Typography>
         <Grid container>
           {session.exercises.map((e) => (
@@ -255,21 +272,21 @@ export default function ViewSession(props: any) {
               <Grid>
                 <TextField
                   sx={{ mx: 1 }}
-                  label="Reps"
+                  label="Sets"
                   type="number"
                   variant="outlined"
-                  value={newExercise.reps}
-                  onChange={(evt) => handleNewExerciseRepsChange(evt)}
+                  value={newExercise.sets}
+                  onChange={(evt) => handleNewExerciseSetsChange(evt)}
                 />
               </Grid>
               <Grid>
                 <TextField
                   sx={{ mx: 1 }}
-                  label="Weight"
-                  variant="outlined"
+                  label="Reps Per Set"
                   type="number"
-                  value={newExercise.weight}
-                  onChange={(evt) => handleNewExerciseWeightChange(evt)}
+                  variant="outlined"
+                  value={newExercise.repsPerSet}
+                  onChange={(evt) => handleNewExerciseRepsChange(evt)}
                 />
               </Grid>
               <Grid>

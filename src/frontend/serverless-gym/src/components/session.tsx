@@ -50,11 +50,12 @@ export default function SessionPage() {
     id: "",
     date: "",
     exercises: [],
+    status: ""
   });
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
-    setSession({ id: "", date: "", exercises: [] });
+    setSession({ id: "", date: "", exercises: [], status: "" });
     setOpen(false);
   };
   const apiService = new ApiService(navigate);
@@ -66,6 +67,7 @@ export default function SessionPage() {
       id: "",
       date: "",
       exercises: [],
+      status: ""
     });
 
     refreshData();
@@ -168,6 +170,9 @@ export default function SessionPage() {
               <Box key={d.id} sx={{ minWidth: 275, p: 2 }}>
                 <Typography variant="h3">
                   <Link href={getLink(d)}>{d.id}</Link>
+                </Typography>
+                <Typography variant="p">
+                  Status: {d.status}
                 </Typography>
                 <Grid>
                   <TableContainer component={Paper}>

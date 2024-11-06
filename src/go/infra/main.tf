@@ -40,6 +40,7 @@ resource "google_cloud_run_v2_service" "default" {
     max_instance_request_concurrency = 10
     containers {
       image = var.canary_enabled ? "${var.repository}:${var.canary_image_tag}" : "${var.repository}:${var.live_image_tag}"
+      depends_on = ["datadog"]
       env {
         name = "DD_API_KEY"
         value_source {
@@ -86,11 +87,65 @@ resource "google_cloud_run_v2_service" "default" {
         name  = "QUEUE_NAME"
         value = google_cloud_tasks_queue.default.id
       }
+      env {
+        name = "DD_LOGS_ENABLED"
+        value = "true"
+      }
       dynamic "env" {
         for_each = var.canary_enabled ? { "CANARY" = 1 } : {}
         content {
           name  = env.key
           value = env.value
+        }
+      }
+    }
+    containers {
+      name  = "datadog"
+      image = "gcr.io/datadoghq/serverless-init:1.2.5"
+      env {
+        name  = "DD_ENV"
+        value = "dev"
+      }
+      env {
+        name  = "DD_VERSION"
+        value = var.live_image_tag
+      }
+      env {
+        name = "DD_SERVICE"
+        value = "gcloud-serverless-gym"
+      }
+      env {
+        name  = "DD_SITE"
+        value = "datadoghq.eu"
+      }
+      env {
+        name = "DD_LOGS_ENABLED"
+        value = "true"
+      }
+      env {
+        name = "DD_API_KEY"
+        value_source {
+          secret_key_ref {
+            secret  = "projects/854841797518/secrets/dd-api-key"
+            version = "1"
+          }
+        }
+      }
+      env {
+        name  = "DD_HEALTH_PORT"
+        value = "12345"
+      }
+      env {
+        name  = "GCLOUD_PROJECT_ID"
+        value = data.google_project.project.project_id
+      }
+      startup_probe {
+        initial_delay_seconds = 0
+        timeout_seconds = 1
+        period_seconds = 10
+        failure_threshold = 3
+        tcp_socket {
+          port = 12345
         }
       }
     }

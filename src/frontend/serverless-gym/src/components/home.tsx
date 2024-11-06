@@ -88,8 +88,6 @@ export default function Home() {
 
     setNetWorkout(newWorkout);
 
-    console.log(newWorkout);
-
     setNewExercise({
       name: "",
       sets: 0,
@@ -106,7 +104,6 @@ export default function Home() {
       workoutId,
       newSessionName
     );
-    console.log(postResponse);
 
     navigate(`session/${encodeURIComponent(postResponse.id)}`);
   };

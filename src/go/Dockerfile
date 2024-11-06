@@ -19,12 +19,5 @@ ENV APP_HOME /go/src/gcloud-serverless-gym
 
 COPY --from=builder "$APP_HOME"/gcloud-serverless-gym /
 
-COPY --from=gcr.io/datadoghq/serverless-init:1-alpine /datadog-init /app/datadog-init
-ENTRYPOINT ["/app/datadog-init"]
-ENV DD_SERVICE=gcloud-go
-ENV DD_ENV=gcloud-go
-ENV DD_VERSION=1
-ENV DD_TRACE_SAMPLE_RATE 1
-
 EXPOSE 8080
-CMD ["./gcloud-serverless-gym"]
+ENTRYPOINT ["./gcloud-serverless-gym"]
