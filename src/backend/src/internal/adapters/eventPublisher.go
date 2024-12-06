@@ -10,17 +10,23 @@ import (
 	"strconv"
 
 	pubsub "cloud.google.com/go/pubsub"
+	"github.com/DataDog/datadog-go/v5/statsd"
 	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
 )
 
 type PubSubEventPublisher struct {
-	client *pubsub.Client
+	client       *pubsub.Client
+	statsDClient *statsd.Client
 }
 
 func NewPubSubEventPublisher(ctx context.Context) *PubSubEventPublisher {
 	c, _ := pubsub.NewClient(ctx, os.Getenv("GCLOUD_PROJECT_ID"))
 
-	return &PubSubEventPublisher{client: c}
+	client, _ := statsd.New("127.0.0.1:8125",
+		statsd.WithTags([]string{"env:prod"}),
+	)
+
+	return &PubSubEventPublisher{client: c, statsDClient: client}
 }
 
 func (srv *PubSubEventPublisher) PublishExerciseUpdatedEvent(ctx context.Context, e domain.ExerciseHistory, newRecords []domain.ExerciseHistoryRecord) {
@@ -33,6 +39,13 @@ func (srv *PubSubEventPublisher) PublishExerciseUpdatedEvent(ctx context.Context
 	history := []domain.ExerciseHistoryRecordDTO{}
 
 	for index := range newRecords {
+		exercise_span, _ := tracer.StartSpanFromContext(ctx, "exercise")
+		exercise_span.SetTag("exercise.name", e.Name)
+		exercise_span.SetTag("exercise.date", newRecords[index].Date)
+		exercise_span.SetTag("exercise.set", newRecords[index].Set)
+		exercise_span.SetTag("exercise.weight", newRecords[index].Weight)
+		exercise_span.SetTag("exercise.reps", newRecords[index].Reps)
+
 		historyRecord := domain.ExerciseHistoryRecordDTO{
 			Date:   newRecords[index].Date,
 			Set:    newRecords[index].Set,
@@ -41,6 +54,8 @@ func (srv *PubSubEventPublisher) PublishExerciseUpdatedEvent(ctx context.Context
 		}
 
 		history = append(history, historyRecord)
+
+		exercise_span.Finish()
 	}
 
 	evt := domain.ExerciseUpdatedEventV1{

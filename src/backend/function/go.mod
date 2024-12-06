@@ -17,6 +17,8 @@ require (
 	dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9 // indirect
 	github.com/BurntSushi/toml v0.3.1 // indirect
 	github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802 // indirect
+	github.com/DataDog/datadog-go/v5 v5.5.0 // indirect
+	github.com/Microsoft/go-winio v0.5.0 // indirect
 	github.com/OneOfOne/xxhash v1.2.2 // indirect
 	github.com/antihax/optional v1.0.0 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.2.1 // indirect
@@ -66,8 +68,8 @@ require (
 	github.com/rogpeppe/fastuuid v1.2.0 // indirect
 	github.com/rogpeppe/go-internal v1.3.0 // indirect
 	github.com/spaolacci/murmur3 v0.0.0-20180118202830-f09979ecbc72 // indirect
-	github.com/stretchr/objx v0.1.0 // indirect
-	github.com/stretchr/testify v1.6.1 // indirect
+	github.com/stretchr/objx v0.5.0 // indirect
+	github.com/stretchr/testify v1.8.1 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/yuin/goldmark v1.3.5 // indirect
 	go.opencensus.io v0.23.0 // indirect
@@ -99,7 +101,7 @@ require (
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/errgo.v2 v2.1.0 // indirect
 	gopkg.in/yaml.v2 v2.3.0 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 	honnef.co/go/tools v0.0.1-2020.1.4 // indirect
 	rsc.io/binaryregexp v0.2.0 // indirect
 	rsc.io/quote/v3 v3.1.0 // indirect
